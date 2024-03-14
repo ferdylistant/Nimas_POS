@@ -21,5 +21,8 @@ Route::middleware(['auth'])->group(function () use ($path) {
     Route::get('/', $path . '\DashboardController@index')->name('dashboard');
     Route::prefix('category')->group(function () use ($path) {
         Route::get('/', $path . '\Api\CategoryController@index')->name('category.index');
+        Route::match(['get', 'post'],'/{type}/ajax-modal', $path . '\Api\CategoryController@ajaxModal');
+        Route::post('/store', $path . '\Api\CategoryController@store');
+        Route::post('/update', $path . '\Api\CategoryController@update');
     });
 });

@@ -223,63 +223,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js"></script>
     <script src="{{ asset('vendors/loadingModal/js/jquery.loadingModal.js') }}"></script>
     @vite('resources/js/app.js')
+    <script type="text/javascript" src="{{ asset('pages/js/main.js') }}"></script>
     @yield('jsRequired')
     {{-- <script src="https://cdn.jsdelivr.net/npm/@mojs/core"></script> --}}
-    <script>
-        $(window).on("load", function() {
-            $('body').loadingModal({
-                text: 'Loading',
-                animation: 'wanderingCubes',
 
-            });
-            setTimeout(function() {
-                $('body').loadingModal('hide');
-            }, 1000);
-        });
-        $(document).ready(function() {
-            if (window.location.href.indexOf("login") !== -1) {
-                window.history.pushState(null, null, window.location.href);
-            } else {
-                function disableBack() {
-                    window.history.forward()
-                }
-                window.onload = disableBack();
-                window.onpageshow = function(e) {
-                    if (e.persisted)
-                        disableBack();
-                }
-            }
-        })
-        $(function() {
-            $('.logout-confirm').click(function(e) {
-                e.preventDefault();
-
-                var url = "{{ route('logout') }}";
-                $.confirm({
-                    theme: 'modern',
-                    icon: 'fa fa-question',
-                    title: 'Are you sure to sign out?',
-                    content: false,
-                    type: 'purple',
-                    columnClass: 'col-md-6 col-md-offset-3',
-                    animationBounce: 2.5,
-                    buttons: {
-                        confirm: {
-                            text: 'Sure!',
-                            btnClass: 'btn-purple',
-                            action: function() {
-                                window.location.href = url;
-                            }
-                        },
-                        cancel: function() {
-                            // $.alert('Canceled!');
-                        }
-                    }
-                })
-
-            })
-        });
-    </script>
     @yield('jsNeeded')
 </body>
 
