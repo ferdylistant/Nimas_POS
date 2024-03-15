@@ -1,11 +1,17 @@
 $(document).ready(function () {
     let baseUrl = window.location.origin;
-    let tbCategory = $('#tb_Category').DataTable({
+    let tbCategory = $('#tb_Product').DataTable({
         "responsive": true,
         "autoWidth": false,
         select: true,
         processing: true,
         serverSide: false,
+        fixedColumns: {
+            left: 0,
+            right: 1
+        },
+        scrollX: true,
+        scrollY: 300,
         language: {
             searchPlaceholder: 'Cari...',
             sSearch: '',
@@ -21,10 +27,15 @@ $(document).ready(function () {
                 })
                 // console.log(tooltipTriggerList);
         },
-        ajax: baseUrl + "/category",
+        ajax: baseUrl + "/products",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', title: 'No', searchable: false, className: 'text-center text-secondary text-sm' },
+            { data: 'product_code', name: 'product_code', title: 'Kode Produk', className: 'text-center text-secondary text-sm' },
+            { data: 'product_name', name: 'product_name', title: 'Nama Produk', className: 'text-center text-secondary text-sm' },
             { data: 'category_name', name: 'category_name', title: 'Kategori Produk', className: 'text-center text-secondary text-sm' },
+            { data: 'buying_price', name: 'buying_price', title: 'Harga Beli', className: 'text-center text-secondary text-sm' },
+            { data: 'selling_price', name: 'selling_price', title: 'Harga Jual', className: 'text-center text-secondary text-sm' },
+            { data: 'buying_date', name: 'buying_date', title: 'Tgl. Beli', className: 'text-center text-secondary text-sm' },
             { data: 'created_at', name: 'created_at', title: 'Tanggal Dibuat', className: 'text-center text-secondary text-sm' },
             { data: 'updated_at', name: 'updated_at', title: 'Tanggal Diubah', className: 'text-center text-secondary text-sm' },
             { data: 'action', name: 'action', title: 'Action', orderable: false, className: 'text-center text-sm' },

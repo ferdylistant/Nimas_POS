@@ -25,4 +25,7 @@ Route::middleware(['auth'])->group(function () use ($path) {
         Route::post('/store', $path . '\Api\CategoryController@store');
         Route::post('/update', $path . '\Api\CategoryController@update');
     });
+    Route::prefix('products')->group(function () use ($path) {
+       Route::get('/', $path . '\Api\ProductController@index')->name('product.index'); 
+    });
 });

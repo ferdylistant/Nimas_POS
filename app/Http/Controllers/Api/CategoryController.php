@@ -47,6 +47,7 @@ class CategoryController extends Controller
                 ->rawColumns([
                     'category_name',
                     'created_at',
+                    'updated_at',
                     'action',
                 ])
                 ->make(true);
