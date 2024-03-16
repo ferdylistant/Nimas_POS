@@ -54,7 +54,7 @@ class ProductController extends Controller
                 })
                 ->addColumn('action', function ($data) {
                     $option = '';
-                    $option .= '<div class="dropup float-lg-end pe-4">
+                    $option .= '<div class="dropdown float-lg-end pe-4">
                 <a class="cursor-pointer tooltip-wrapper" id="dropdownTable'.$data->id.'" data-bs-toggle="dropdown" title="" data-bs-original-title="More Actions" aria-expanded="false">
                     <i class="fa fa-list-ul text-secondary"></i>
                 </a>

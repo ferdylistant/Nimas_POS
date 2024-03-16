@@ -3,15 +3,23 @@ $(document).ready(function () {
     let tbCategory = $('#tb_Product').DataTable({
         "responsive": true,
         "autoWidth": false,
-        select: true,
-        processing: true,
-        serverSide: false,
+        scrollX: true,
         fixedColumns: {
             left: 0,
             right: 1
         },
-        scrollX: true,
-        scrollY: 300,
+        // columnDefs: [
+        //   {
+        //     targets: -1,
+        //     className: 'dt-body-right',
+        //     render: function (data, type, row) {
+        //         return $('.sticky-dropdown').html();
+        //       }
+        //   }
+        // ],
+        // select: true,
+        processing: true,
+        serverSide: false,
         language: {
             searchPlaceholder: 'Cari...',
             sSearch: '',
@@ -38,7 +46,7 @@ $(document).ready(function () {
             { data: 'buying_date', name: 'buying_date', title: 'Tgl. Beli', className: 'text-center text-secondary text-sm' },
             { data: 'created_at', name: 'created_at', title: 'Tanggal Dibuat', className: 'text-center text-secondary text-sm' },
             { data: 'updated_at', name: 'updated_at', title: 'Tanggal Diubah', className: 'text-center text-secondary text-sm' },
-            { data: 'action', name: 'action', title: 'Action', orderable: false, className: 'text-center text-sm' },
+            { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false, className: 'text-sm' },
         ]
     });
     $.fn.dataTable.ext.errMode = function (settings, helpPage, message) {

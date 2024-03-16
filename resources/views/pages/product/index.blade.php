@@ -8,15 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.css" integrity="sha512-DIW4FkYTOxjCqRt7oS9BFO+nVOwDL4bzukDyDtMO7crjUZhwpyrWBFroq+IqRe6VnJkTpRAS6nhDvf0w+wHmxg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 @endsection
 @section('cssNeeded')
-    <style>
-        table.dataTable thead th {
-            font-size: 0.9em;
-        }
-
-        /* table.dataTable tbody td {
-            font-size: 0.9em;
-        } */
-    </style>
+    <link rel="stylesheet" href="{{asset('pages/css/product/index.css')}}">
 @endsection
 @section('content')
     <div class="row">
@@ -51,7 +43,7 @@
                     <hr class="horizontal dark mt-0">
                 </div>
                 <div class="card-body px-5 pt-0 pb-4">
-                    <table class="table nowrap align-items-center align-middle mb-0" id="tb_Product">
+                    <table class="table align-items-center align-middle" id="tb_Product" style="width:100%">
                     </table>
                 </div>
             </div>
