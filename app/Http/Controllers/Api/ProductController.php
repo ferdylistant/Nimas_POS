@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
-use App\Models\Product;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
+use App\Models\{Product,Category};
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Intervention\Image\Facades\Image;
@@ -54,12 +55,12 @@ class ProductController extends Controller
                 })
                 ->addColumn('action', function ($data) {
                     $option = '';
-                    $option .= '<div class="dropdown float-lg-end pe-4">
-                <a class="cursor-pointer tooltip-wrapper" id="dropdownTable'.$data->id.'" data-bs-toggle="dropdown" title="" data-bs-original-title="More Actions" aria-expanded="false">
-                    <i class="fa fa-list-ul text-secondary"></i>
+                    $option .= '<div class="dropstart float-lg-end pe-4">
+                <a class="cursor-pointer" id="dropdownTable" data-bs-toggle="dropdown" title="" data-bs-original-title="More Actions" aria-expanded="false">
+                    <i class="fa fa-list-ul text-secondary  tooltip-wrapper"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5"
-                    aria-labelledby="dropdownTable'.$data->id.'" >
+                    aria-labelledby="dropdownTable" >
                     <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
                             data-bs-target="#mdProduct" data-type="edit" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-edit me-2"></i> Edit</a></li>
                     <li><a class="dropdown-item border-radius-md text-danger" href="javascript:;"><i
@@ -204,5 +205,75 @@ class ProductController extends Controller
         } else {
             DB::table('products')->where('id', $id)->delete();
         }
+    }
+    public function ajaxModal(Request $request)
+    {
+        if ($request->ajax()) {
+            if ($request->type == 'edit') {
+                return self::showModalEdit($request);
+            }
+            return self::showModalCreate();
+        }
+        return abort(404);
+    }
+    public function select2(Request $request)
+    {
+        switch ($request->type) {
+            case 'category':
+                return self::select2Category($request);
+                break;
+            case 'supplier':
+                return self::select2Supplier($request);
+                break;
+            default:
+            return abort(404);
+                break;
+        }
+    }
+    protected function select2Category($request)
+    {
+        $category = Category::where('category_name', 'like', '%' . $request->q . '%')->get();
+        return response()->json($category);
+    }
+    protected function select2Supplier($request)
+    {
+        $supplier = Supplier::where('name', 'like', '%' . $request->q . '%')->get();
+        return response()->json($supplier);
+    }
+    protected function showModalCreate()
+    {
+        $category = Category::all();
+        $html = '';
+        $html .= '<form id="fm_addProduct">';
+        $html .= csrf_field();
+        $html .= '<div class="row">
+                <div class="form-group col-md-6">
+                    <label for="categoryField" class="col-form-label">Category Name:</label>
+                    <select name="category_id" id="categoryField" class="form-control select-category" required>
+                        <option label="Choose One"></option>
+                    </select>
+                    <span id="err_category_id"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="supplierField" class="col-form-label">Supplier Name:</label>
+                    <select name="supplier_id" id="supplierField" class="form-control select-supplier" required>
+                        <option label="Choose One"></option>
+                    </select>
+                    <span id="err_supplier_id"></span>
+                </div>
+            </div>
+            </form>';
+        $title = '<i class="fa fa-plus me-2"></i> Create Product';
+        $idForm = 'fm_addProduct';
+        return [
+            'title' => $title,
+            'html' => $html,
+            'idForm' => $idForm
+        ];
+
+    }
+    protected function showModalEdit($request)
+    {
+
     }
 }

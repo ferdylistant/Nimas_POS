@@ -1,8 +1,8 @@
 $(document).ready(function () {
     let baseUrl = window.location.origin;
-    let tbCategory = $('#tb_Product').DataTable({
+    let tbProduct = $('#tb_Product').DataTable({
         "responsive": true,
-        "autoWidth": false,
+        "autoWidth": true,
         scrollX: true,
         fixedColumns: {
             left: 0,
@@ -26,15 +26,6 @@ $(document).ready(function () {
             lengthMenu: '_MENU_ /halaman',
         },
         order: [[0, 'asc']],
-        drawCallback: () => {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('.tooltip-wrapper'))
-                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl, {
-                        trigger: 'hover'
-                    })
-                })
-                // console.log(tooltipTriggerList);
-        },
         ajax: baseUrl + "/products",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', title: 'No', searchable: false, className: 'text-center text-secondary text-sm' },
@@ -49,6 +40,7 @@ $(document).ready(function () {
             { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false, className: 'text-sm' },
         ]
     });
+
     $.fn.dataTable.ext.errMode = function (settings, helpPage, message) {
         // console.log(message);
         // notifToast("error",settings.jqXHR.statusText)
@@ -56,18 +48,78 @@ $(document).ready(function () {
             window.location.reload();
         }
     };
-    function ajaxModalCategory(el, type, id, name) {
+    function select2Category() {
+        $('.select-category').select2({
+            placeholder: 'Pilih...',
+            allowClear: true,
+            dropdownParent: $("#mdProduct"),
+            width: 'resolve',
+            ajax: {
+                url: baseUrl + "/products/select2/category",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term
+                    };
+
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.category_name,
+                                id: item.id,
+                            };
+                        }),
+                    };
+                },
+                cache: true
+            }
+        });
+    }
+    function select2Supplier() {
+        $('.select-supplier').select2({
+            placeholder: 'Pilih...',
+            allowClear: true,
+            dropdownParent: $("#mdProduct"),
+            width: 'resolve',
+            ajax: {
+                url: baseUrl + "/products/select2/supplier",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term
+                    };
+
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.name,
+                                id: item.id,
+                            };
+                        }),
+                    };
+                },
+                cache: true
+            }
+        });
+    }
+    function ajaxModalProduct(el, type, id, name) {
         $.ajax({
             type: "GET",
-            url: baseUrl + "/category/" + type + "/ajax-modal",
+            url: baseUrl + "/products/" + type + "/ajax-modal",
             data: {
                 id: id,
                 name: name
             },
             success: function (result) {
-                el.find('#titleModalCategory').html(result.title);
-                el.find(':submit').data('el','#'+result.idForm);
-                el.find(':submit').attr('form',result.idForm);
+                el.find('#titleModalProduct').html(result.title);
+                el.find(':submit').data('el', '#' + result.idForm);
+                el.find(':submit').attr('form', result.idForm);
                 el.find('#mainContent').html(result.html);
             },
             error: function (err) {
@@ -75,18 +127,20 @@ $(document).ready(function () {
                 notifToast("error", err.responseJSON.message);
             },
             complete: function () {
-                let valid = jqueryValidation_("#fm_" + type + "Category", {
+                let valid = jqueryValidation_("#fm_" + type + "Product", {
                     category_name: {
                         required: true,
                     }
                 });
+                select2Category();
+                select2Supplier();
             }
         });
     }
-    function ajaxAddCategory(el) {
+    function ajaxAddProduct(el) {
         $.ajax({
             type: "POST",
-            url: baseUrl + "/category/store",
+            url: baseUrl + "/products/store",
             data: new FormData($(el).get(0)),
             processData: false,
             contentType: false,
@@ -96,8 +150,8 @@ $(document).ready(function () {
                 notifToast(result.status, result.message);
                 $("#fm_addCategory").trigger("reset");
                 if (result.status == "success") {
-                    tbCategory.ajax.reload();
-                    // $('#mdCategory').modal('hide');
+                    tbProduct.ajax.reload();
+                    // $('#mdProduct').modal('hide');
                 }
             },
             error: function (err) {
@@ -105,7 +159,7 @@ $(document).ready(function () {
             }
         });
     }
-    function ajaxEditCategory(el) {
+    function ajaxEditProduct(el) {
         $.ajax({
             type: "POST",
             url: baseUrl + "/category/update",
@@ -116,8 +170,8 @@ $(document).ready(function () {
             success: function (result) {
                 notifToast(result.status, result.message);
                 if (result.status == "success") {
-                    tbCategory.ajax.reload();
-                    $('#mdCategory').modal('hide');
+                    tbProduct.ajax.reload();
+                    $('#mdProduct').modal('hide');
                 }
             },
             error: function (err) {
@@ -125,19 +179,19 @@ $(document).ready(function () {
             }
         });
     }
-    $('#mdCategory').on({
+    $('#mdProduct').on({
         'shown.bs.modal': function (e) {
             var type = $(e.relatedTarget).data('type');
             var id = $(e.relatedTarget).data('id');
             var name = $(e.relatedTarget).data('name');
             var el = $(this);
-            ajaxModalCategory(el, type, id, name);
+            ajaxModalProduct(el, type, id, name);
         },
         'hidden.bs.modal': function () {
             $(this).find('#mainContent').html('');
-            $(this).find('#titleModalCategory').html('');
-            $(this).find(':submit').data('el','');
-            $(this).find(':submit').attr('form','');
+            $(this).find('#titleModalProduct').html('');
+            $(this).find(':submit').data('el', '');
+            $(this).find(':submit').attr('form', '');
         },
         'submit': function (e) {
             e.preventDefault();
@@ -159,11 +213,11 @@ $(document).ready(function () {
                         confirm: {
                             text: 'Sure!',
                             btnClass: 'btn-purple',
-                            action: function() {
-                                title === 'Add Category' ? ajaxAddCategory(el) : ajaxEditCategory(el);
+                            action: function () {
+                                title === 'Add Category' ? ajaxAddProduct(el) : ajaxEditProduct(el);
                             }
                         },
-                        cancel: function() {
+                        cancel: function () {
                             // $.alert('Canceled!');
                         }
                     }

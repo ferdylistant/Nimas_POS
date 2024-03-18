@@ -21,11 +21,16 @@ Route::middleware(['auth'])->group(function () use ($path) {
     Route::get('/', $path . '\DashboardController@index')->name('dashboard');
     Route::prefix('category')->group(function () use ($path) {
         Route::get('/', $path . '\Api\CategoryController@index')->name('category.index');
-        Route::match(['get', 'post'],'/{type}/ajax-modal', $path . '\Api\CategoryController@ajaxModal');
+        Route::match(['get', 'post'], '/{type}/ajax-modal', $path . '\Api\CategoryController@ajaxModal');
         Route::post('/store', $path . '\Api\CategoryController@store');
         Route::post('/update', $path . '\Api\CategoryController@update');
     });
     Route::prefix('products')->group(function () use ($path) {
-       Route::get('/', $path . '\Api\ProductController@index')->name('product.index'); 
+        Route::get('/', $path . '\Api\ProductController@index')->name('product.index');
+        Route::match(['get', 'post'], '/{type}/ajax-modal', $path . '\Api\ProductController@ajaxModal');
+        Route::post('/store', $path . '\Api\ProductController@store');
+        Route::post('/update', $path . '\Api\ProductController@update');
+        Route::post('/delete', $path . '\Api\ProductController@delete');
+        Route::get('/select2/{type}', $path . '\Api\ProductController@select2');
     });
 });

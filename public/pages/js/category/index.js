@@ -12,15 +12,6 @@ $(document).ready(function () {
             lengthMenu: '_MENU_ /halaman',
         },
         order: [[0, 'asc']],
-        drawCallback: () => {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('.tooltip-wrapper'))
-                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl, {
-                        trigger: 'hover'
-                    })
-                })
-                // console.log(tooltipTriggerList);
-        },
         ajax: baseUrl + "/category",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', title: 'No', searchable: false, className: 'text-center text-secondary text-sm' },

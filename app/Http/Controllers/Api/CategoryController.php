@@ -31,7 +31,7 @@ class CategoryController extends Controller
                 ->addColumn('action', function ($data) {
                     $option = '';
                     $option .= '<div class="dropdown float-lg-end pe-4">
-                <a class="cursor-pointer tooltip-wrapper" id="dropdownTable" data-bs-toggle="dropdown" title="" data-bs-original-title="More Actions" aria-expanded="false">
+                <a class="cursor-pointer" id="dropdownTable" data-bs-toggle="dropdown" title="" data-bs-original-title="More Actions" aria-expanded="false">
                     <i class="fa fa-list-ul text-secondary"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5"
@@ -67,7 +67,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    //------------------Insert/Store------------------------------------
+//------------------Insert/Store------------------------------------
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

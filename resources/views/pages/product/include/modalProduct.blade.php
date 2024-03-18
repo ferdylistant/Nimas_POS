@@ -1,9 +1,9 @@
-<div class="modal fade" id="mdCategory" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog"
-    aria-labelledby="titleModalCategory" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-dialog-scrollable" role="document">
+<div class="modal fade" id="mdProduct" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog"
+    aria-labelledby="titleModalProduct" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="titleModalCategory"></h5>
+                <h5 class="modal-title" id="titleModalProduct"></h5>
                 <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>

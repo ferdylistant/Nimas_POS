@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.bootstrap5.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/5.0.0/css/fixedColumns.bootstrap5.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.css" integrity="sha512-DIW4FkYTOxjCqRt7oS9BFO+nVOwDL4bzukDyDtMO7crjUZhwpyrWBFroq+IqRe6VnJkTpRAS6nhDvf0w+wHmxg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="{{ asset('vendors/select2/select2-main.css') }}" rel="stylesheet" />
+    {{-- <link rel="stylesheet" href="{{ asset('vendors/select2/select2.css') }}" /> --}}
 @endsection
 @section('cssNeeded')
     <link rel="stylesheet" href="{{asset('pages/css/product/index.css')}}">
@@ -28,7 +30,7 @@
                                 <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5"
                                     aria-labelledby="dropdownTable">
                                     <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
-                                            data-bs-target="#mdCategory" data-type="add" data-id="" data-name=""><i
+                                            data-bs-target="#mdProduct" data-type="add" data-id="" data-name=""><i
                                                 class="fa fa-plus me-2"></i>
                                             Create</a></li>
                                     <li><a class="dropdown-item border-radius-md" href="javascript:;"><i
@@ -58,6 +60,7 @@
     <script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/5.0.0/js/fixedColumns.bootstrap5.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js" integrity="sha512-Zq9o+E00xhhR/7vJ49mxFNJ0KQw1E1TMWkPTxrWcnpfEFDEXgUiwJHIKit93EW/XxE31HSI5GEOW06G6BF1AtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 @endsection
 @section('jsNeeded')
     <script src="{{ asset('pages/js/product/index.js') }}"></script>
