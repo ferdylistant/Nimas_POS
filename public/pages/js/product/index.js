@@ -56,8 +56,6 @@ $(document).ready(function () {
             width: 'resolve',
             ajax: {
                 url: baseUrl + "/products/select2/category",
-                dataType: 'json',
-                delay: 250,
                 data: function (params) {
                     return {
                         q: params.term
@@ -83,11 +81,8 @@ $(document).ready(function () {
             placeholder: 'Pilih...',
             allowClear: true,
             dropdownParent: $("#mdProduct"),
-            width: 'resolve',
             ajax: {
                 url: baseUrl + "/products/select2/supplier",
-                dataType: 'json',
-                delay: 250,
                 data: function (params) {
                     return {
                         q: params.term
@@ -104,8 +99,77 @@ $(document).ready(function () {
                         }),
                     };
                 },
-                cache: true
             }
+        }).on("change", function (e) {
+            if (this.value) {
+                $(this).valid();
+            }
+        });
+    }
+    function ajaxClickAddMore() {
+        var max_fields = 20; //maximum input boxes allowed
+        var wrapper = $('.input_fields_wrap'); //Fields wrapper
+
+        var x = 1; //initlal text box count
+        $('.btnAddSupplier').click(function (e) {
+            // console.log(e);
+            //on add input button click
+            e.preventDefault();
+            if (x < max_fields) {
+                //max input box allowed
+                x++; //text box increment
+                $(wrapper).append(
+                    `<div class="field-more"><div class="form-group col-md-6">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                        <span class="input-group-text"><a href="javascript:void(0)" class="remove_field text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
+                    </div>
+                <select name="supplier_id[]" id="supplierField" class="form-control select-supplier" required>
+                    <option label="Choose One"></option>
+                </select>
+                <span id="err_supplier_id"></span>
+                </div>
+            </div>
+            <div class="form-group col-md-6">
+                <input type="number" name="buying_price[]" id="buying_priceField" class="form-control form-control-sm" required>
+                <span id="err_buying_price"></span>
+            </div></div>`
+                );
+                $('.select-supplier').select2({
+                    placeholder: 'Pilih...',
+                    allowClear: true,
+                    dropdownParent: $("#mdProduct"),
+                    ajax: {
+                        url: baseUrl + "/products/select2/supplier",
+                        data: function (params) {
+                            return {
+                                q: params.term
+                            };
+
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: $.map(data, function (item) {
+                                    return {
+                                        text: item.name,
+                                        id: item.id,
+                                    };
+                                }),
+                            };
+                        },
+                    }
+                }).on("change", function (e) {
+                    if (this.value) {
+                        $(this).valid();
+                    }
+                });
+            }
+        });
+        $(wrapper).on("click", ".remove_field", function (e) {
+            //user click on remove text
+            e.preventDefault();
+            $(this).closest(".field-more").remove();
+            x--;
         });
     }
     function ajaxModalProduct(el, type, id, name) {
@@ -132,6 +196,7 @@ $(document).ready(function () {
                         required: true,
                     }
                 });
+                ajaxClickAddMore();
                 select2Category();
                 select2Supplier();
             }
@@ -225,4 +290,5 @@ $(document).ready(function () {
             }
         }
     })
+
 });

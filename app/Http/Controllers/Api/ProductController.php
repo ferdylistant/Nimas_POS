@@ -61,8 +61,10 @@ class ProductController extends Controller
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5"
                     aria-labelledby="dropdownTable" >
+                    <li><a class="dropdown-item border-radius-md" href="javascript:;"><i class="fa fa-eye me-2"></i> Detail </a></li>
                     <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
                             data-bs-target="#mdProduct" data-type="edit" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-edit me-2"></i> Edit</a></li>
+                    <li><a class="dropdown-item border-radius-md" href="javascript:;"><i class="fa fa-history me-2"></i> History</a></li>
                     <li><a class="dropdown-item border-radius-md text-danger" href="javascript:;"><i
                                 class="fa fa-trash me-2"></i> Delete</a></li>
                 </ul>
@@ -247,20 +249,35 @@ class ProductController extends Controller
         $html .= '<form id="fm_addProduct">';
         $html .= csrf_field();
         $html .= '<div class="row">
-                <div class="form-group col-md-6">
-                    <label for="categoryField" class="col-form-label">Category Name:</label>
+                <div class="form-group col-md-12">
+                    <label for="categoryField" class="col-form-label">Category Name: <span class="text-danger">*</span></label>
                     <select name="category_id" id="categoryField" class="form-control select-category" required>
                         <option label="Choose One"></option>
                     </select>
                     <span id="err_category_id"></span>
                 </div>
+            </div>
+            <div class="row input_fields_wrap">
                 <div class="form-group col-md-6">
-                    <label for="supplierField" class="col-form-label">Supplier Name:</label>
-                    <select name="supplier_id" id="supplierField" class="form-control select-supplier" required>
-                        <option label="Choose One"></option>
-                    </select>
-                    <span id="err_supplier_id"></span>
+                <div class="d-flex justify-content-between">
+                <label for="supplierField" class="col-form-label">Supplier Name: <span class="text-danger">*</span></label>
+                <button type="button" class="btn btn-primary btn-sm rounded btnAddSupplier" title="Add Supplier"><i class="fas fa-plus"></i></button>
                 </div>
+                <select name="supplier_id" id="supplierField" class="form-control select-supplier" required>
+                    <option label="Choose One"></option>
+                </select>
+                <span id="err_supplier_id"></span>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="buying_priceField" class="col-form-label mb-2">Buying Price: <span class="text-danger">*</span></label>
+                <input type="number" name="buying_price" id="buying_priceField" class="form-control form-control-sm" required>
+                <span id="err_buying_price"></span>
+            </div>
+            </div>
+            <div class="form-group">
+                <label for="buying_dateField" class="col-form-label">Buying Date: <span class="text-danger">*</span></label>
+                <input type="date" name="buying_date" id="buying_dateField" class="form-control form-control-sm" required>
+                <span id="err_buying_date"></span>
             </div>
             </form>';
         $title = '<i class="fa fa-plus me-2"></i> Create Product';
