@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
-use App\Models\{Product,Category};
+use App\Models\{Product, Category};
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Intervention\Image\Facades\Image;
@@ -71,11 +71,11 @@ class ProductController extends Controller
             </div>';
                     return $option;
                 })
-                ->rawColumns(['','created_at','updated_at','action'])
+                ->rawColumns(['', 'created_at', 'updated_at', 'action'])
                 ->make(true);
             return $dataTables;
         }
-        return view('pages.product.index',[
+        return view('pages.product.index', [
             'breadcrumb' => '<nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
                 <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="' . route('dashboard') . '">Dashboard</a>
@@ -228,7 +228,7 @@ class ProductController extends Controller
                 return self::select2Supplier($request);
                 break;
             default:
-            return abort(404);
+                return abort(404);
                 break;
         }
     }
@@ -258,27 +258,53 @@ class ProductController extends Controller
                 </div>
             </div>
             <div class="row input_fields_wrap">
-                <div class="form-group col-md-6">
-                <div class="d-flex justify-content-between">
-                <label for="supplierField" class="col-form-label">Supplier Name: <span class="text-danger">*</span></label>
-                <button type="button" class="btn btn-primary btn-sm rounded btnAddSupplier" title="Add Supplier"><i class="fas fa-plus"></i></button>
+                <div class="form-group col-md-4">
+                    <div class="d-flex justify-content-between">
+                        <label for="supplierField" class="col-form-label">Supplier Name: <span class="text-danger">*</span></label>
+                        <button type="button" class="btn btn-primary btn-sm rounded btnAddSupplier" title="Add Supplier"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <select name="supplier_id[]" id="supplierField" class="form-control form-control-sm select-supplier" required>
+                        <option label="Choose One"></option>
+                    </select>
+                    <span id="err_supplier_id"></span>
                 </div>
-                <select name="supplier_id" id="supplierField" class="form-control select-supplier" required>
-                    <option label="Choose One"></option>
-                </select>
-                <span id="err_supplier_id"></span>
+                <div class="form-group col-md-4">
+                    <label for="product_amountField" class="col-form-label mb-2">Amount: <span class="text-danger">*</span></label>
+                    <input type="number" name="product_quantity[]" id="product_amountField" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
+                    <span id="err_product_quantity"></span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="buying_priceField" class="col-form-label mb-2">Buying Price: <span class="text-danger">*</span></label>
+                    <input type="number" name="buying_price[]" id="buying_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Buying Price" required>
+                    <span id="err_buying_price"></span>
+                </div>
             </div>
-            <div class="form-group col-md-6">
-                <label for="buying_priceField" class="col-form-label mb-2">Buying Price: <span class="text-danger">*</span></label>
-                <input type="number" name="buying_price" id="buying_priceField" class="form-control form-control-sm" required>
-                <span id="err_buying_price"></span>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="product_nameField" class="col-form-label">Product Name: <span class="text-danger">*</span></label>
+                    <input type="text" name="product_name" id="product_nameField" class="form-control form-control-sm" placeholder="Enter Product Name" required>
+                    <span id="err_product_name"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="buying_dateField" class="col-form-label">Buying Date: <span class="text-danger">*</span></label>
+                    <input type="text" name="buying_date" id="buying_dateField" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
+                    <span id="err_buying_date"></span>
+                </div>
             </div>
-            </div>
-            <div class="form-group">
-                <label for="buying_dateField" class="col-form-label">Buying Date: <span class="text-danger">*</span></label>
-                <input type="date" name="buying_date" id="buying_dateField" class="form-control form-control-sm" required>
-                <span id="err_buying_date"></span>
-            </div>
+            <div class="row input_fields_wrap_selling">
+                <div class="form-group col-md-6">
+                    <div class="d-flex justify-content-between">
+                        <label for="selling_price_typeField" class="col-form-label">Selling Price Type: <span class="text-danger">*</span></label>
+                        <button type="button" class="btn btn-primary btn-sm rounded btnAddSellingPrice" title="Add Selling Price"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <input type="text" name="selling_price_type" id="selling_price_typeField" class="form-control form-control-sm" placeholder="Enter Selling Price Type" required>
+                    <span id="err_selling_price_type"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="selling_priceField" class="col-form-label mb-2">Selling Price: <span class="text-danger">*</span></label>
+                    <input type="number" name="selling_price" id="selling_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Selling Price" required>
+                    <span id="err_selling_price"></span>
+                </div>
             </form>';
         $title = '<i class="fa fa-plus me-2"></i> Create Product';
         $idForm = 'fm_addProduct';
@@ -287,10 +313,8 @@ class ProductController extends Controller
             'html' => $html,
             'idForm' => $idForm
         ];
-
     }
     protected function showModalEdit($request)
     {
-
     }
 }

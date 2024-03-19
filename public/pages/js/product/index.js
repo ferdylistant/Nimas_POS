@@ -50,7 +50,7 @@ $(document).ready(function () {
     };
     function select2Category() {
         $('.select-category').select2({
-            placeholder: 'Pilih...',
+            placeholder: 'Choose category',
             allowClear: true,
             dropdownParent: $("#mdProduct"),
             width: 'resolve',
@@ -77,40 +77,44 @@ $(document).ready(function () {
         });
     }
     function select2Supplier() {
-        $('.select-supplier').select2({
-            placeholder: 'Pilih...',
-            allowClear: true,
-            dropdownParent: $("#mdProduct"),
-            ajax: {
-                url: baseUrl + "/products/select2/supplier",
-                data: function (params) {
-                    return {
-                        q: params.term
-                    };
+        $('.select-supplier').each(function (e) {
+            $(this).select2({
+                placeholder: 'Choose supplier',
+                allowClear: true,
+                dropdownParent: $("#mdProduct"),
+                ajax: {
+                    url: baseUrl + "/products/select2/supplier",
+                    data: function (params) {
+                        return {
+                            q: params.term
+                        };
 
-                },
-                processResults: function (data) {
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.name,
-                                id: item.id,
-                            };
-                        }),
-                    };
-                },
-            }
-        }).on("change", function (e) {
-            if (this.value) {
-                $(this).valid();
-            }
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.name,
+                                    id: item.id,
+                                };
+                            }),
+                        };
+                    },
+                }
+            }).on("change", function (e) {
+                if (this.value) {
+                    $(this).valid();
+                }
+            });
         });
     }
     function ajaxClickAddMore() {
         var max_fields = 20; //maximum input boxes allowed
         var wrapper = $('.input_fields_wrap'); //Fields wrapper
+        var wrapperS = $('.input_fields_wrap_selling'); //Fields wrapper
 
         var x = 1; //initlal text box count
+        var y = 1; //initlal text box count
         $('.btnAddSupplier').click(function (e) {
             // console.log(e);
             //on add input button click
@@ -119,58 +123,66 @@ $(document).ready(function () {
                 //max input box allowed
                 x++; //text box increment
                 $(wrapper).append(
-                    `<div class="field-more"><div class="form-group col-md-6">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text"><a href="javascript:void(0)" class="remove_field text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
-                    </div>
-                <select name="supplier_id[]" id="supplierField" class="form-control select-supplier" required>
+                    `<div class="row field-more"><div class="form-group col-md-4">
+                <select name="supplier_id[]" id="supplierFieldMore` + x + `" class="form-control form-control-sm select-supplier" required>
                     <option label="Choose One"></option>
                 </select>
                 <span id="err_supplier_id"></span>
-                </div>
             </div>
-            <div class="form-group col-md-6">
-                <input type="number" name="buying_price[]" id="buying_priceField" class="form-control form-control-sm" required>
+            <div class="form-group col-md-4">
+            <input type="number" name="product_quantity" id="product_amountField` + x + `" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
+                    <span id="err_product_quantity[]"></span>
+                </div>
+            <div class="form-group col-md-4">
+                <div class="input-group input-group-sm">
+                <input type="number" name="buying_price[]" id="buying_priceField` + x + `" min="1" class="form-control form-control-sm" placeholder="Enter Buying Price" required>
+                <div class="input-group-append">
+                        <span class="input-group-text"><a href="javascript:void(0)" class="remove_field text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
+                    </div>
                 <span id="err_buying_price"></span>
+                </div>
             </div></div>`
                 );
-                $('.select-supplier').select2({
-                    placeholder: 'Pilih...',
-                    allowClear: true,
-                    dropdownParent: $("#mdProduct"),
-                    ajax: {
-                        url: baseUrl + "/products/select2/supplier",
-                        data: function (params) {
-                            return {
-                                q: params.term
-                            };
-
-                        },
-                        processResults: function (data) {
-                            return {
-                                results: $.map(data, function (item) {
-                                    return {
-                                        text: item.name,
-                                        id: item.id,
-                                    };
-                                }),
-                            };
-                        },
-                    }
-                }).on("change", function (e) {
-                    if (this.value) {
-                        $(this).valid();
-                    }
-                });
+                select2Supplier();
             }
         });
-        $(wrapper).on("click", ".remove_field", function (e) {
+        $(wrapperS).on("click", ".remove_field", function (e) {
             //user click on remove text
             e.preventDefault();
             $(this).closest(".field-more").remove();
             x--;
         });
+        $('.btnAddSellingPrice').click(function (e) {
+            // console.log(e);
+            //on add input button click
+            e.preventDefault();
+            if (y < max_fields) {
+                //max input box allowed
+                y++; //text box increment
+                $(wrapperS).append(
+                    `<div class="row field-more-selling"><div class="form-group col-md-6">
+                    <input type="text" name="selling_price_type" id="selling_price_typeField` + y + `" class="form-control form-control-sm" placeholder="Enter Selling Price Type" required>
+                    <span id="err_selling_price_type"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="input-group input-group-sm">
+                    <input type="number" name="selling_price" id="selling_priceField` + y + `" min="1" class="form-control form-control-sm" placeholder="Enter Selling Price" required>
+                    <div class="input-group-append">
+                        <span class="input-group-text"><a href="javascript:void(0)" class="remove_field text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
+                    </div>
+                    <span id="err_selling_price"></span>
+                    </div>
+                </div></div>`
+                );
+            }
+        });
+        $(wrapperS).on("click", ".remove_field", function (e) {
+            //user click on remove text
+            e.preventDefault();
+            $(this).closest(".field-more-selling").remove();
+            y--;
+        });
+
     }
     function ajaxModalProduct(el, type, id, name) {
         $.ajax({
@@ -185,6 +197,24 @@ $(document).ready(function () {
                 el.find(':submit').data('el', '#' + result.idForm);
                 el.find(':submit').attr('form', result.idForm);
                 el.find('#mainContent').html(result.html);
+                new AirDatepicker("#buying_dateField", {
+                    autoClose: true,
+                    locale: {
+                        days: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+                        daysShort: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                        daysMin: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                        months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                        monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'],
+                        today: 'Hari ini',
+                        clear: 'Hapus',
+                        dateFormat: 'dd/MM/yyyy',
+                        timeFormat: 'hh:mm aa',
+                        firstDay: 1
+                    },
+                    container: "#mdProduct",
+                    position: 'top left',
+
+                });
             },
             error: function (err) {
                 console.log(err.responseJSON.message);
@@ -290,5 +320,4 @@ $(document).ready(function () {
             }
         }
     })
-
 });

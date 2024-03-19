@@ -8,4 +8,9 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    resolve: {
+        alias: {
+          '~air-datepicker': 'node_modules/air-datepicker/air-datepicker.js',
+        }
+      }
 });

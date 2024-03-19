@@ -1,6 +1,8 @@
 import _ from 'lodash';
+import AirDatepicker from 'air-datepicker';
+import 'air-datepicker/air-datepicker.css';
 window._ = _;
-
+window.AirDatepicker = AirDatepicker;
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
  * to our Laravel back-end. This library automatically handles sending the
