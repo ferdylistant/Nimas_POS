@@ -6,10 +6,11 @@ use Carbon\Carbon;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
-use App\Models\{Product, Category};
 use Illuminate\Support\Facades\DB;
+use App\Models\{Product, Category};
 use App\Http\Controllers\Controller;
 use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -90,18 +91,17 @@ class ProductController extends Controller
     //------------------Insert/Store------------------------------------
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        $validators = Validator::make($request->all(), [
             'product_name' => 'required|max:255',
             'product_code' => 'required|unique:products|max:255',
             'category_id' => 'required',
             'supplier_id' => 'required',
             'buying_price' => 'required',
-            'root' => 'required',
             'selling_price' => 'required',
             'buying_date' => 'required',
             'product_quantity' => 'required',
+            'image' => 'mimes:jpg,jpeg,png|max:5048',
         ]);
-
         if ($request->image) {
             $position = strpos($request->image, ';');
             $sub = substr($request->image, 0, $position);
@@ -266,27 +266,38 @@ class ProductController extends Controller
                     <select name="supplier_id[]" id="supplierField" class="form-control form-control-sm select-supplier" required>
                         <option label="Choose One"></option>
                     </select>
-                    <span id="err_supplier_id"></span>
                 </div>
                 <div class="form-group col-md-4">
                     <label for="product_amountField" class="col-form-label mb-2">Amount: <span class="text-danger">*</span></label>
                     <input type="number" name="product_quantity[]" id="product_amountField" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
-                    <span id="err_product_quantity"></span>
                 </div>
                 <div class="form-group col-md-4">
                     <label for="buying_priceField" class="col-form-label mb-2">Buying Price: <span class="text-danger">*</span></label>
                     <input type="number" name="buying_price[]" id="buying_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Buying Price" required>
-                    <span id="err_buying_price"></span>
                 </div>
             </div>
             <div class="row">
                 <div class="form-group col-md-6">
-                    <label for="product_nameField" class="col-form-label">Product Name: <span class="text-danger">*</span></label>
+                    <label for="product_nameField" class="col-form-label mb-2">Product Name: <span class="text-danger">*</span></label>
                     <input type="text" name="product_name" id="product_nameField" class="form-control form-control-sm" placeholder="Enter Product Name" required>
                     <span id="err_product_name"></span>
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="buying_dateField" class="col-form-label">Buying Date: <span class="text-danger">*</span></label>
+                <label for="kodeField" class="col-form-label">Kode: <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-sm">
+                    <input type="text" name="product_code" id="kodeField" class="form-control form-control-sm" placeholder="Enter/Scan Product Code" required>
+                    <div class="input-group-append">
+                        <span class="input-group-text text-primary">
+                            <a href="javascript:void(0)" class="btnCheckProductCode" title="Check Product Code"><i class="fas fa-barcode"></i></a>
+                        </span>
+                    </div>
+                    <span id="err_product_code"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <label for="buying_dateField" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
                     <input type="text" name="buying_date" id="buying_dateField" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
                     <span id="err_buying_date"></span>
                 </div>
@@ -294,17 +305,24 @@ class ProductController extends Controller
             <div class="row input_fields_wrap_selling">
                 <div class="form-group col-md-6">
                     <div class="d-flex justify-content-between">
-                        <label for="selling_price_typeField" class="col-form-label">Selling Price Type: <span class="text-danger">*</span></label>
+                        <label for="selling_price_typeField" class="col-form-label mb-2">Selling Price Type: <span class="text-danger">*</span></label>
                         <button type="button" class="btn btn-primary btn-sm rounded btnAddSellingPrice" title="Add Selling Price"><i class="fas fa-plus"></i></button>
                     </div>
-                    <input type="text" name="selling_price_type" id="selling_price_typeField" class="form-control form-control-sm" placeholder="Enter Selling Price Type" required>
-                    <span id="err_selling_price_type"></span>
+                    <input type="text" name="selling_price_type[]" id="selling_price_typeField" class="form-control form-control-sm" placeholder="Enter Selling Price Type" required>
                 </div>
                 <div class="form-group col-md-6">
                     <label for="selling_priceField" class="col-form-label mb-2">Selling Price: <span class="text-danger">*</span></label>
-                    <input type="number" name="selling_price" id="selling_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Selling Price" required>
-                    <span id="err_selling_price"></span>
+                    <input type="number" name="selling_price[]" id="selling_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Selling Price" required>
                 </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <label for="imageField" class="col-form-label mb-2">Image: <span class="text-danger">*</span></label>
+                    <input type="file" name="image" id="imageField" onchange="onFileSelected(event)" class="form-control form-control-sm" required>
+                    <span id="err_image"></span>
+                </div>
+                <div id="image_preview"></div>
+            </div>
             </form>';
         $title = '<i class="fa fa-plus me-2"></i> Create Product';
         $idForm = 'fm_addProduct';

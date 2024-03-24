@@ -30,7 +30,7 @@ function jqueryValidation_(element, rules, messages = {}) {
 
         },
         rules: _rules,
-        ignore: ".note-editor *",
+        ignore: [],
         messages: messages
     })
 }

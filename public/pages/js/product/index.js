@@ -74,6 +74,10 @@ $(document).ready(function () {
                 },
                 cache: true
             }
+        }).on("change", function (e) {
+            if (this.value) {
+                $(this).valid();
+            }
         });
     }
     function select2Supplier() {
@@ -112,7 +116,6 @@ $(document).ready(function () {
         var max_fields = 20; //maximum input boxes allowed
         var wrapper = $('.input_fields_wrap'); //Fields wrapper
         var wrapperS = $('.input_fields_wrap_selling'); //Fields wrapper
-
         var x = 1; //initlal text box count
         var y = 1; //initlal text box count
         $('.btnAddSupplier').click(function (e) {
@@ -127,33 +130,30 @@ $(document).ready(function () {
                 <select name="supplier_id[]" id="supplierFieldMore` + x + `" class="form-control form-control-sm select-supplier" required>
                     <option label="Choose One"></option>
                 </select>
-                <span id="err_supplier_id"></span>
             </div>
             <div class="form-group col-md-4">
             <input type="number" name="product_quantity" id="product_amountField` + x + `" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
-                    <span id="err_product_quantity[]"></span>
                 </div>
             <div class="form-group col-md-4">
                 <div class="input-group input-group-sm">
                 <input type="number" name="buying_price[]" id="buying_priceField` + x + `" min="1" class="form-control form-control-sm" placeholder="Enter Buying Price" required>
                 <div class="input-group-append">
-                        <span class="input-group-text"><a href="javascript:void(0)" class="remove_field text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
+                        <span class="input-group-text"><a href="javascript:void(0)" class="remove_field_supplier text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
                     </div>
-                <span id="err_buying_price"></span>
                 </div>
             </div></div>`
                 );
                 select2Supplier();
             }
         });
-        $(wrapperS).on("click", ".remove_field", function (e) {
+        $(wrapper).on("click", ".remove_field_supplier", function (e) {
+            console.log('supplier');
             //user click on remove text
             e.preventDefault();
             $(this).closest(".field-more").remove();
             x--;
         });
         $('.btnAddSellingPrice').click(function (e) {
-            // console.log(e);
             //on add input button click
             e.preventDefault();
             if (y < max_fields) {
@@ -161,22 +161,21 @@ $(document).ready(function () {
                 y++; //text box increment
                 $(wrapperS).append(
                     `<div class="row field-more-selling"><div class="form-group col-md-6">
-                    <input type="text" name="selling_price_type" id="selling_price_typeField` + y + `" class="form-control form-control-sm" placeholder="Enter Selling Price Type" required>
-                    <span id="err_selling_price_type"></span>
+                    <input type="text" name="selling_price_type[]" id="selling_price_typeField` + y + `" class="form-control form-control-sm" placeholder="Enter Selling Price Type" required>
                 </div>
                 <div class="form-group col-md-6">
                     <div class="input-group input-group-sm">
-                    <input type="number" name="selling_price" id="selling_priceField` + y + `" min="1" class="form-control form-control-sm" placeholder="Enter Selling Price" required>
+                    <input type="number" name="selling_price[]" id="selling_priceField` + y + `" min="1" class="form-control form-control-sm" placeholder="Enter Selling Price" required>
                     <div class="input-group-append">
-                        <span class="input-group-text"><a href="javascript:void(0)" class="remove_field text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
+                        <span class="input-group-text"><a href="javascript:void(0)" class="remove_field_selling_price text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
                     </div>
-                    <span id="err_selling_price"></span>
                     </div>
                 </div></div>`
                 );
             }
         });
-        $(wrapperS).on("click", ".remove_field", function (e) {
+        $(wrapperS).on("click", ".remove_field_selling_price", function (e) {
+            console.log('selling price');
             //user click on remove text
             e.preventDefault();
             $(this).closest(".field-more-selling").remove();
@@ -213,6 +212,11 @@ $(document).ready(function () {
                     },
                     container: "#mdProduct",
                     position: 'top left',
+                    buttons: ['clear'],
+                    onSelect: function (selectedDates, dateStr, instance) {
+                        console.log(selectedDates.formattedDate);
+                        $('#buying_dateField').val(selectedDates.formattedDate).valid();
+                    }
 
                 });
             },
@@ -224,7 +228,34 @@ $(document).ready(function () {
                 let valid = jqueryValidation_("#fm_" + type + "Product", {
                     category_name: {
                         required: true,
-                    }
+                    },
+                    'supplier_id[]': {
+                        required: true,
+                    },
+                    'product_quantity[]': {
+                        required: true,
+                        number: true
+                    },
+                    'buying_price[]': {
+                        required: true,
+                        number: true
+                    },
+                    product_name: {
+                        required: true,
+                    },
+                    product_code: {
+                        required: true,
+                    },
+                    buying_date: {
+                        required: true,
+                    },
+                    'selling_price_type[]': {
+                        required: true,
+                    },
+                    'selling_price[]': {
+                        required: true,
+                        number: true
+                    },
                 });
                 ajaxClickAddMore();
                 select2Category();
@@ -243,14 +274,14 @@ $(document).ready(function () {
             success: function (result) {
                 // console.log(result);
                 notifToast(result.status, result.message);
-                $("#fm_addCategory").trigger("reset");
+                $("#fm_addProduct").trigger("reset");
                 if (result.status == "success") {
                     tbProduct.ajax.reload();
                     // $('#mdProduct').modal('hide');
                 }
             },
             error: function (err) {
-                notifToast("error", err.responseJSON.message);
+                notifToast("error", err.statusText);
             }
         });
     }
@@ -290,12 +321,12 @@ $(document).ready(function () {
         },
         'submit': function (e) {
             e.preventDefault();
-            var val = $(this).find('[name="category_name"]').val();
+            var val = $(this).find('[name="product_name"]').val();
             var ele = $(this).find(':submit').data('el');
             var el = $(ele);
             if (el.valid()) {
-                var title = ele === '#fm_addCategory' ? 'Add Category' : 'Edit Category';
-                var text = ele === '#fm_addCategory' ? 'add category (' + val + ')?' : 'edit category (' + val + ')?';
+                var title = ele === '#fm_addProduct' ? 'Add Product' : 'Edit Product';
+                var text = ele === '#fm_addProduct' ? 'add product (' + val + ')?' : 'edit product (' + val + ')?';
                 $.confirm({
                     theme: 'modern',
                     icon: 'fa fa-question',
@@ -309,7 +340,7 @@ $(document).ready(function () {
                             text: 'Sure!',
                             btnClass: 'btn-purple',
                             action: function () {
-                                title === 'Add Category' ? ajaxAddProduct(el) : ajaxEditProduct(el);
+                                title === 'Add Product' ? ajaxAddProduct(el) : ajaxEditProduct(el);
                             }
                         },
                         cancel: function () {
@@ -319,5 +350,46 @@ $(document).ready(function () {
                 });
             }
         }
-    })
+    });
 });
+const uploadManager = new Bytescale.UploadManager({
+    apiKey: "free" // e.g. "public_xxxxx"
+  });
+async function onFileSelected(event) {
+    try {
+      // 1) Hide upload button when upload starts.
+    //   uploadButton.remove()
+
+      // 2) Upload file & show progress.
+      const [ file ]    = event.target.files
+      const { fileUrl } = await uploadManager.upload({
+        data: file,
+        onProgress: ({ progress }) =>
+
+          document.querySelector('#image_preview').innerHTML = `<div class="progress-wrapper">
+          <div class="progress-info">
+            <span class="text-sm font-weight-bold">Uploading...</span>
+            <div class="progress-percentage">
+              <span class="text-sm font-weight-bold">${progress.toFixed(2)}%</span>
+            </div>
+          </div>
+          <div class="progress">
+            <div class="progress-bar bg-primary" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100" style="width: ${progress}%;"></div>
+          </div>
+        </div>`
+      })
+
+      // 3) Display uploaded file URL.
+      document.querySelector('#image_preview').innerHTML = `
+        <img src="${fileUrl}" width="200" class="img-thumbnail rounded">`
+      document.querySelector('.modal-body').scrollBy(document.querySelector('.modal-body').offsetHeight, document.querySelector('.modal-body').scrollY);
+    //   document.querySelector('.modal-body').scrollTo = (0, document.querySelector('.modal-body').scrollHeight)
+    //   setTimeout(() => {
+    //       document.querySelector('.modal-body').scrollTo = (0, document.querySelector('.modal-body').scrollHeight)
+    //   }, 2000)
+
+    } catch(e) {
+      // 4) Display errors.
+      document.querySelector('#image_preview').innerHTML = `Please try another file:<br/><br/>${e.message}`
+    }
+  }
