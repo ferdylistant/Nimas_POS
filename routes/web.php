@@ -29,6 +29,7 @@ Route::middleware(['auth'])->group(function () use ($path) {
         Route::get('/', $path . '\Api\ProductController@index')->name('product.index');
         Route::match(['get', 'post'], '/{type}/ajax-modal', $path . '\Api\ProductController@ajaxModal');
         Route::post('/store', $path . '\Api\ProductController@store');
+        Route::get('/detail/{id}', $path . '\Api\ProductController@show');
         Route::post('/update', $path . '\Api\ProductController@update');
         Route::post('/delete', $path . '\Api\ProductController@delete');
         Route::get('/select2/{type}', $path . '\Api\ProductController@select2');

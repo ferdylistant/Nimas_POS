@@ -4,6 +4,7 @@ $(document).ready(function () {
         "responsive": true,
         "autoWidth": true,
         scrollX: true,
+        scrollY: 300,
         fixedColumns: {
             left: 0,
             right: 1
@@ -29,12 +30,12 @@ $(document).ready(function () {
         ajax: baseUrl + "/products",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', title: 'No', searchable: false, className: 'text-center text-secondary text-sm' },
+            { data: 'image', name: 'image', title: 'Gambar Produk', className: 'text-center text-secondary text-sm' },
             { data: 'product_code', name: 'product_code', title: 'Kode Produk', className: 'text-center text-secondary text-sm' },
             { data: 'product_name', name: 'product_name', title: 'Nama Produk', className: 'text-center text-secondary text-sm' },
             { data: 'category_name', name: 'category_name', title: 'Kategori Produk', className: 'text-center text-secondary text-sm' },
-            { data: 'buying_price', name: 'buying_price', title: 'Harga Beli', className: 'text-center text-secondary text-sm' },
-            { data: 'selling_price', name: 'selling_price', title: 'Harga Jual', className: 'text-center text-secondary text-sm' },
             { data: 'buying_date', name: 'buying_date', title: 'Tgl. Beli', className: 'text-center text-secondary text-sm' },
+            { data: 'total_stock', name: 'total_stock', title: 'Stok', className: 'text-center text-secondary text-sm' },
             { data: 'created_at', name: 'created_at', title: 'Tanggal Dibuat', className: 'text-center text-secondary text-sm' },
             { data: 'updated_at', name: 'updated_at', title: 'Tanggal Diubah', className: 'text-center text-secondary text-sm' },
             { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false, className: 'text-sm' },
@@ -132,7 +133,7 @@ $(document).ready(function () {
                 </select>
             </div>
             <div class="form-group col-md-4">
-            <input type="number" name="product_quantity" id="product_amountField` + x + `" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
+            <input type="number" name="product_quantity[]" id="product_amountField` + x + `" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
                 </div>
             <div class="form-group col-md-4">
                 <div class="input-group input-group-sm">
@@ -256,6 +257,10 @@ $(document).ready(function () {
                         required: true,
                         number: true
                     },
+                    image: {
+                        required: true,
+                        extension: "jpg|png|jpeg|webp"
+                    }
                 });
                 ajaxClickAddMore();
                 select2Category();
@@ -274,10 +279,10 @@ $(document).ready(function () {
             success: function (result) {
                 // console.log(result);
                 notifToast(result.status, result.message);
-                $("#fm_addProduct").trigger("reset");
                 if (result.status == "success") {
+                    $("#fm_addProduct").trigger("reset");
+                    $('#mdProduct').modal('hide');
                     tbProduct.ajax.reload();
-                    // $('#mdProduct').modal('hide');
                 }
             },
             error: function (err) {
@@ -382,7 +387,6 @@ async function onFileSelected(event) {
       // 3) Display uploaded file URL.
       document.querySelector('#image_preview').innerHTML = `
         <img src="${fileUrl}" width="200" class="img-thumbnail rounded">`
-      document.querySelector('.modal-body').scrollBy(document.querySelector('.modal-body').offsetHeight, document.querySelector('.modal-body').scrollY);
     //   document.querySelector('.modal-body').scrollTo = (0, document.querySelector('.modal-body').scrollHeight)
     //   setTimeout(() => {
     //       document.querySelector('.modal-body').scrollTo = (0, document.querySelector('.modal-body').scrollHeight)
@@ -390,6 +394,8 @@ async function onFileSelected(event) {
 
     } catch(e) {
       // 4) Display errors.
-      document.querySelector('#image_preview').innerHTML = `Please try another file:<br/><br/>${e.message}`
+      console.log(`Error: ${e.message}`)
+      document.querySelector('#image_preview').innerHTML = ``
+    //   document.querySelector('#image_preview').innerHTML = `Please try another file:<br/><br/>${e.message}`
     }
   }
