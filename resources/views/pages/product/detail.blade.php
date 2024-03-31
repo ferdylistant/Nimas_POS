@@ -2,6 +2,9 @@
 @section('title')
     {{ config('app.name', 'Laravel') }} | Detail Produk
 @endsection
+@section('cssRequired')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.css" integrity="sha512-DIW4FkYTOxjCqRt7oS9BFO+nVOwDL4bzukDyDtMO7crjUZhwpyrWBFroq+IqRe6VnJkTpRAS6nhDvf0w+wHmxg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+@endsection
 @section('content')
     <div class="row">
         <div class="col-12">
@@ -30,7 +33,10 @@
                                     <li class="list-group-item  align-items-center">
                                         <span class="text-sm">Product Code</span>
                                         <br>
-                                        <span class="text-dark">{{ $product->product_code }}</span>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-dark">{{ $product->product_code }}</span>
+                                            <a href="javascript:void(0)" class="text-primary" data-bs-toggle="modal" data-bs-target="#mdBarcode" title="Print Barcode"><i class="fa fa-barcode"></i></a>
+                                        </div>
                                     </li>
                                     <li class="list-group-item align-items-center">
                                         <span class="text-sm">Product Name</span>
@@ -45,12 +51,7 @@
                                     <li class="list-group-item align-items-center">
                                         <span class="text-sm">Stock</span>
                                         <br>
-                                        <span class="text-dark">{{ $product->total_stock }}</span>
-                                    </li>
-                                    <li class="list-group-item align-items-center">
-                                        <span class="text-sm">Buying Date</span>
-                                        <br>
-                                        <span class="text-dark">{{ Carbon\Carbon::parse($product->buying_date)->translatedFormat('d M Y') }}</span>
+                                        <span class="text-dark">{{ $product->total_stock .' '.$product->unit_satuan}}</span>
                                     </li>
                                 </ul>
                             </div>
@@ -66,14 +67,16 @@
                                                     <th scope="col text-center">Supplier Name</th>
                                                     <th scope="col text-center">Quantity</th>
                                                     <th scope="col text-center">Buying Price</th>
+                                                    <th scope="col text-center">Buying Date</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach ($productSupplier as $psup)
                                                 <tr>
                                                     <td class="text-dark text-center">{{ $psup->supplier_name }}</td>
-                                                    <td class="text-dark text-center">{{ $psup->product_qty }}</td>
+                                                    <td class="text-dark text-center">{{ $psup->product_qty.' '.$product->unit_satuan }}</td>
                                                     <td class="text-dark text-center">@format_rupiah($psup->buying_price)</td>
+                                                    <td class="text-dark text-center">{{Carbon\Carbon::parse($psup->buying_date)->translatedFormat('d M Y')}}</td>
                                                 </tr>
                                                 @endforeach
                                             </tbody>
@@ -99,4 +102,11 @@
             </div>
         </div>
     </div>
+    @include('pages.product.include.modalBarcode')
+@endsection
+@section('jsRequired')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js" integrity="sha512-Zq9o+E00xhhR/7vJ49mxFNJ0KQw1E1TMWkPTxrWcnpfEFDEXgUiwJHIKit93EW/XxE31HSI5GEOW06G6BF1AtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+@endsection
+@section('jsNeeded')
+<script src="{{ asset('pages/js/product/detail.js') }}"></script>
 @endsection

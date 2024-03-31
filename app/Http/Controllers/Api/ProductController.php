@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
 use App\Models\Supplier;
+use Milon\Barcode\DNS1D;
+use Milon\Barcode\DNS2D;
 use Illuminate\Http\Request;
 use App\Models\ProductSupplier;
 use Yajra\DataTables\DataTables;
@@ -45,9 +47,9 @@ class ProductController extends Controller
                 ->addColumn('category_name', function ($data) {
                     return $data->category_name;
                 })
-                ->addColumn('buying_date', function ($data) {
-                    return Carbon::parse($data->buying_date)->translatedFormat('d/m/Y');
-                })
+                // ->addColumn('buying_date', function ($data) {
+                //     return Carbon::parse($data->buying_date)->translatedFormat('d/m/Y');
+                // })
                 ->addColumn('total_stock', function ($data) {
                     return $data->total_stock;
                 })
@@ -96,6 +98,7 @@ class ProductController extends Controller
     {
         try {
             $validators = Validator::make($request->all(), [
+                'unit_satuan' => 'required|max:6',
                 'product_name' => 'required|max:255',
                 'product_code' => 'required|unique:products|max:255',
                 'category_id' => 'required',
@@ -117,6 +120,7 @@ class ProductController extends Controller
             $productQuantity = $request->product_quantity;
             $sellingPriceType = $request->selling_price_type;
             $sellingPrice = $request->selling_price;
+            $buyingDate = $request->buying_date;
             $unique = array_unique($supplierId);
                 if (count($unique) < count($supplierId)) {
                     return response()->json([
@@ -133,9 +137,10 @@ class ProductController extends Controller
             $product->product_name = $request->product_name;
             $product->product_code = $request->product_code;
             $product->category_id = $request->category_id;
-            $product->buying_date = Carbon::createFromFormat('d/m/Y',$request->buying_date)->format('Y-m-d');
+            // $product->buying_date = Carbon::createFromFormat('d/m/Y',$request->buying_date)->format('Y-m-d');
             $product->image =  $imgProduct;
             $product->total_stock = array_sum($productQuantity);
+            $product->unit_satuan = $request->unit_satuan;
             $product->save();
             $product_id = $product->id;
             for ($i = 0; $i < count($supplierId); $i++) {
@@ -144,6 +149,7 @@ class ProductController extends Controller
                 $product_supplier->supplier_id = $supplierId[$i];
                 $product_supplier->buying_price = $buyingPrice[$i];
                 $product_supplier->product_qty = $productQuantity[$i];
+                $product_supplier->buying_date = Carbon::createFromFormat('d/m/Y', $buyingDate[$i])->format('Y-m-d');
                 $product_supplier->save();
             }
             for ($k=0; $k < count($sellingPriceType); $k++) {
@@ -172,6 +178,11 @@ class ProductController extends Controller
     //----------------------------Show(id)-------------------------------------------
     public function show($id)
     {
+        if (request()->ajax()) {
+            if (request()->req == 'get-barcode') {
+                return self::getModalBarcode($id);
+            }
+        }
         $product = DB::table('products')
         ->join('categories', 'products.category_id', 'categories.id')
         ->where('products.id', $id)
@@ -261,6 +272,28 @@ class ProductController extends Controller
             DB::table('products')->where('id', $id)->delete();
         }
     }
+    protected function getModalBarcode($id)
+    {
+        try {
+            $data = DB::table('products')->where('id', $id)->first();
+            $barcode = new DNS1D();
+            $html = '';
+            $html .= '<div class="row">
+            <div class="col-12 text-center">
+            ' . $barcode->getBarcodeSVG($data->product_code, "C128",3,80, 'black') . '
+            </div>
+            </div>';
+            return response()->json([
+                'title' => '<i class="fas fa-barcode"></i> Print Barcode',
+                'html' => $html
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
     public function ajaxModal(Request $request)
     {
         if ($request->ajax()) {
@@ -311,7 +344,7 @@ class ProductController extends Controller
                 </div>
             </div>
             <div class="row input_fields_wrap">
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-3">
                     <div class="d-flex justify-content-between">
                         <label for="supplierField" class="col-form-label">Supplier Name: <span class="text-danger">*</span></label>
                         <button type="button" class="btn btn-primary btn-sm rounded btnAddSupplier" title="Add Supplier"><i class="fas fa-plus"></i></button>
@@ -320,23 +353,32 @@ class ProductController extends Controller
                         <option label="Choose One"></option>
                     </select>
                 </div>
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-3">
                     <label for="product_amountField" class="col-form-label mb-2">Amount: <span class="text-danger">*</span></label>
                     <input type="number" name="product_quantity[]" id="product_amountField" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
                 </div>
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-3">
                     <label for="buying_priceField" class="col-form-label mb-2">Buying Price: <span class="text-danger">*</span></label>
                     <input type="number" name="buying_price[]" id="buying_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Buying Price" required>
                 </div>
+                <div class="form-group col-md-3">
+                    <label for="buying_dateField" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
+                    <input type="text" name="buying_date[]" id="buying_dateField" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
+                </div>
             </div>
             <div class="row">
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-4">
+                    <label for="unit_satuanField" class="col-form-label mb-2">Unit/Satuan: <span class="text-danger">*</span></label>
+                    <input type="text" name="unit_satuan" id="unit_satuanField" class="form-control form-control-sm" placeholder="Enter Product Name" required>
+                    <span id="err_unit_satuan"></span>
+                </div>
+                <div class="form-group col-md-4">
                     <label for="product_nameField" class="col-form-label mb-2">Product Name: <span class="text-danger">*</span></label>
                     <input type="text" name="product_name" id="product_nameField" class="form-control form-control-sm" placeholder="Enter Product Name" required>
                     <span id="err_product_name"></span>
                 </div>
-                <div class="form-group col-md-6">
-                <label for="kodeField" class="col-form-label">Kode: <span class="text-danger">*</span></label>
+                <div class="form-group col-md-4">
+                    <label for="kodeField" class="col-form-label">Kode: <span class="text-danger">*</span></label>
                     <div class="input-group input-group-sm">
                     <input type="text" name="product_code" id="kodeField" class="form-control form-control-sm" placeholder="Enter/Scan Product Code" required>
                     <div class="input-group-append">
@@ -346,13 +388,6 @@ class ProductController extends Controller
                     </div>
                     <span id="err_product_code"></span>
                     </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group col-md-12">
-                    <label for="buying_dateField" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
-                    <input type="text" name="buying_date" id="buying_dateField" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
-                    <span id="err_buying_date"></span>
                 </div>
             </div>
             <div class="row input_fields_wrap_selling">

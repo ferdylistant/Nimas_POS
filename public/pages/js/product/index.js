@@ -113,6 +113,32 @@ $(document).ready(function () {
             });
         });
     }
+    function airDatepicker(el) {
+        new AirDatepicker(el, {
+            autoClose: true,
+            locale: {
+                days: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+                daysShort: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                daysMin: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'],
+                today: 'Hari ini',
+                clear: 'Hapus',
+                dateFormat: 'dd/MM/yyyy',
+                timeFormat: 'hh:mm aa',
+                firstDay: 1
+            },
+            container: "#mdProduct",
+            position: 'top left',
+            buttons: ['clear'],
+            onSelect: function (selectedDates, dateStr, instance) {
+                console.log(selectedDates);
+                // console.log(selectedDates.formattedDate);
+                $(el).val(selectedDates.formattedDate).valid();
+            }
+
+        });
+    }
     function ajaxClickAddMore() {
         var max_fields = 20; //maximum input boxes allowed
         var wrapper = $('.input_fields_wrap'); //Fields wrapper
@@ -127,24 +153,29 @@ $(document).ready(function () {
                 //max input box allowed
                 x++; //text box increment
                 $(wrapper).append(
-                    `<div class="row field-more"><div class="form-group col-md-4">
+                    `<div class="row field-more"><div class="form-group col-md-3">
                 <select name="supplier_id[]" id="supplierFieldMore` + x + `" class="form-control form-control-sm select-supplier" required>
                     <option label="Choose One"></option>
                 </select>
             </div>
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-3">
             <input type="number" name="product_quantity[]" id="product_amountField` + x + `" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
                 </div>
-            <div class="form-group col-md-4">
-                <div class="input-group input-group-sm">
+            <div class="form-group col-md-3">
                 <input type="number" name="buying_price[]" id="buying_priceField` + x + `" min="1" class="form-control form-control-sm" placeholder="Enter Buying Price" required>
+            </div>
+            <div class="form-group col-md-3">
+                <div class="input-group input-group-sm">
+                <input type="text" name="buying_date[]" id="buying_dateField`+x+`" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
                 <div class="input-group-append">
                         <span class="input-group-text"><a href="javascript:void(0)" class="remove_field_supplier text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
                     </div>
                 </div>
-            </div></div>`
+            </div>
+            </div>`
                 );
                 select2Supplier();
+                airDatepicker("#buying_dateField"+x);
             }
         });
         $(wrapper).on("click", ".remove_field_supplier", function (e) {
@@ -197,29 +228,6 @@ $(document).ready(function () {
                 el.find(':submit').data('el', '#' + result.idForm);
                 el.find(':submit').attr('form', result.idForm);
                 el.find('#mainContent').html(result.html);
-                new AirDatepicker("#buying_dateField", {
-                    autoClose: true,
-                    locale: {
-                        days: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
-                        daysShort: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
-                        daysMin: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
-                        months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
-                        monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'],
-                        today: 'Hari ini',
-                        clear: 'Hapus',
-                        dateFormat: 'dd/MM/yyyy',
-                        timeFormat: 'hh:mm aa',
-                        firstDay: 1
-                    },
-                    container: "#mdProduct",
-                    position: 'top left',
-                    buttons: ['clear'],
-                    onSelect: function (selectedDates, dateStr, instance) {
-                        console.log(selectedDates.formattedDate);
-                        $('#buying_dateField').val(selectedDates.formattedDate).valid();
-                    }
-
-                });
             },
             error: function (err) {
                 console.log(err.responseJSON.message);
@@ -241,13 +249,16 @@ $(document).ready(function () {
                         required: true,
                         number: true
                     },
+                    "buying_date[]": {
+                        required: true,
+                    },
                     product_name: {
                         required: true,
                     },
-                    product_code: {
+                    unit_satuan: {
                         required: true,
                     },
-                    buying_date: {
+                    product_code: {
                         required: true,
                     },
                     'selling_price_type[]': {
@@ -265,6 +276,7 @@ $(document).ready(function () {
                 ajaxClickAddMore();
                 select2Category();
                 select2Supplier();
+                airDatepicker('#buying_dateField');
             }
         });
     }
@@ -306,7 +318,7 @@ $(document).ready(function () {
                 }
             },
             error: function (err) {
-                notifToast("error", err.responseJSON.message);
+                notifToast("error", err.statusText);
             }
         });
     }
