@@ -69,6 +69,8 @@ class ProductController extends Controller
                     aria-labelledby="dropdownTable" >
                     <li><a class="dropdown-item border-radius-md" href="'.url('products/detail/'.$data->id).'"><i class="fa fa-eye me-2"></i> Detail </a></li>
                     <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
+                            data-bs-target="#mdProduct" data-type="addStock" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-plus me-2"></i> Add Stock</a></li>
+                    <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
                             data-bs-target="#mdProduct" data-type="edit" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-edit me-2"></i> Edit</a></li>
                     <li><a class="dropdown-item border-radius-md" href="javascript:;"><i class="fa fa-history me-2"></i> History</a></li>
                     <li><a class="dropdown-item border-radius-md text-danger" href="javascript:;"><i
@@ -297,12 +299,22 @@ class ProductController extends Controller
     public function ajaxModal(Request $request)
     {
         if ($request->ajax()) {
-            if ($request->type == 'edit') {
-                return self::showModalEdit($request);
+            switch ($request->type) {
+                case 'edit':
+                    return self::showModalEdit($request);
+                    break;
+                case 'add':
+                    return self::showModalCreate();
+                    break;
+                case 'addStock':
+                    return self::showModalAddStock($request);
+                    break;
+                default:
+                    return abort(404);
+                break;
             }
-            return self::showModalCreate();
         }
-        return abort(404);
+        return abort(400);
     }
     public function select2(Request $request)
     {
@@ -422,5 +434,73 @@ class ProductController extends Controller
     }
     protected function showModalEdit($request)
     {
+    }
+    protected function showModalAddStock($request)
+    {
+        $id = $request->id;
+        $name = $request->name;
+        $prod = Product::find($id);
+        $data = DB::table('product_suppliers as a')
+        ->join('suppliers as b', 'a.supplier_id','=', 'b.id')
+        ->where('a.product_id',$id)->orderBy('a.id', 'ASC')
+        ->select('a.*', 'b.name as supplier_name')
+        ->get();
+        $title = '<i class="fa fa-plus me-2"></i> Add Stock ('.$name.')';
+        $html ='';
+        $html ='<div class="row">
+        <div class="col-md-12 table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center">Supplier Name</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-center">Buying Price</th>
+                        <th class="text-center">Buying Date</th>
+                    </tr>
+                </thead>
+                <tbody>';
+        foreach ($data as $key => $value) {
+            $html .= '<tr>
+                        <td class="text-center">'.$value->supplier_name.'</td>
+                        <td class="text-center">'.$value->product_qty.' '.$prod->unit_satuan .'</td>
+                        <td class="text-center">'.$value->buying_price.'</td>
+                        <td class="text-center">'.Carbon::parse($value->buying_date)->format('d F Y').'</td>
+                    </tr>';
+        }
+        $html .='</tbody>
+            </table>
+        </div>
+        </div>';
+        $html .= '<form id="fm_addStockProduct">
+        <div class="row input_fields_wrap">
+        <div class="form-group col-md-3">
+            <div class="d-flex justify-content-between">
+                <label for="supplierField" class="col-form-label">Supplier Name: <span class="text-danger">*</span></label>
+                <button type="button" class="btn btn-primary btn-sm rounded btnAddSupplier" title="Add Supplier"><i class="fas fa-plus"></i></button>
+            </div>
+            <select name="supplier_id[]" id="supplierField" class="form-control form-control-sm select-supplier" required>
+                <option label="Choose One"></option>
+            </select>
+        </div>
+        <div class="form-group col-md-3">
+            <label for="product_amountField" class="col-form-label mb-2">Amount: <span class="text-danger">*</span></label>
+            <input type="number" name="product_quantity[]" id="product_amountField" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
+        </div>
+        <div class="form-group col-md-3">
+            <label for="buying_priceField" class="col-form-label mb-2">Buying Price: <span class="text-danger">*</span></label>
+            <input type="number" name="buying_price[]" id="buying_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Buying Price" required>
+        </div>
+        <div class="form-group col-md-3">
+            <label for="buying_dateField" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
+            <input type="text" name="buying_date[]" id="buying_dateField" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
+        </div>
+    </div>
+    </form>';
+        $idForm = 'fm_addStockProduct';
+        return [
+            'title' => $title,
+            'html' => $html,
+            'idForm' => $idForm
+        ];
     }
 }

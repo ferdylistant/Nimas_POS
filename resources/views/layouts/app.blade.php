@@ -214,7 +214,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js"></script>
     <script src="{{ asset('vendors/loadingModal/js/jquery.loadingModal.js') }}"></script>
     @vite('resources/js/app.js')
-    <script type="text/javascript" src="{{ asset('pages/js/main.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('pages/js/main.js') }}" async defer></script>
     @yield('jsRequired')
     {{-- <script src="https://cdn.jsdelivr.net/npm/@mojs/core"></script> --}}
 

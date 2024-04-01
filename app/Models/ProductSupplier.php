@@ -8,7 +8,7 @@ class ProductSupplier extends Model
 {
     protected $table = 'product_suppliers';
     protected $fillable = [
-        'product_id', 'supplier_id', 'product_qty','buying_price'
+        'product_id', 'supplier_id', 'product_qty','buying_price', 'buying_date'
 
     ];
 }

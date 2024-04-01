@@ -34,7 +34,6 @@ $(document).ready(function () {
             { data: 'product_code', name: 'product_code', title: 'Kode Produk', className: 'text-center text-secondary text-sm' },
             { data: 'product_name', name: 'product_name', title: 'Nama Produk', className: 'text-center text-secondary text-sm' },
             { data: 'category_name', name: 'category_name', title: 'Kategori Produk', className: 'text-center text-secondary text-sm' },
-            { data: 'buying_date', name: 'buying_date', title: 'Tgl. Beli', className: 'text-center text-secondary text-sm' },
             { data: 'total_stock', name: 'total_stock', title: 'Stok', className: 'text-center text-secondary text-sm' },
             { data: 'created_at', name: 'created_at', title: 'Tanggal Dibuat', className: 'text-center text-secondary text-sm' },
             { data: 'updated_at', name: 'updated_at', title: 'Tanggal Diubah', className: 'text-center text-secondary text-sm' },
@@ -230,8 +229,8 @@ $(document).ready(function () {
                 el.find('#mainContent').html(result.html);
             },
             error: function (err) {
-                console.log(err.responseJSON.message);
-                notifToast("error", err.responseJSON.message);
+                console.log(err.statusText);
+                notifToast("error", err.statusText);
             },
             complete: function () {
                 let valid = jqueryValidation_("#fm_" + type + "Product", {
