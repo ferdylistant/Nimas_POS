@@ -1,8 +1,8 @@
-$(document).ready(function() {
+$(document).ready(function () {
     function ajaxModalBarcode(el, id) {
         $.ajax({
             type: "GET",
-            url: window.location.origin + "/products/detail/"+id,
+            url: window.location.origin + "/products/detail/" + id,
             data: {
                 req: "get-barcode",
             },
@@ -25,5 +25,24 @@ $(document).ready(function() {
             $(this).find('#mainContent').html('');
             $(this).find('#titleModalBarcode').html('');
         }
-    })
+    });
+    $('#tableSupplier').on({
+        'show.bs.collapse': (e) => {
+
+            $('#' + e.currentTarget.ownerDocument.activeElement.id).html('<i class="fas fa-minus-circle"></i> ');
+
+        },
+        'hidden.bs.collapse': (e) => {
+            $('#' + e.currentTarget.ownerDocument.activeElement.id).html('<i class="fas fa-plus-circle"></i> ');
+        }
+    });
+    // $('.btn-toggle-collapse').click(function (e) {
+    //     // console.log(e.currentTarget.id);
+    //     if ($('#' + e.currentTarget.id + ' i').hasClass('fas fa-plus-circle')) {
+    //         $('#' + e.currentTarget.id).html('<i class="fas fa-minus-circle"></i> ');
+    //     }
+    //     else {
+    //         $('#' + e.currentTarget.id).html('<i class="fas fa-plus-circle"></i> ');
+    //     }
+    // })
 });

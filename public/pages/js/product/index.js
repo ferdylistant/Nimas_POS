@@ -35,6 +35,7 @@ $(document).ready(function () {
             { data: 'product_name', name: 'product_name', title: 'Nama Produk', className: 'text-center text-secondary text-sm' },
             { data: 'category_name', name: 'category_name', title: 'Kategori Produk', className: 'text-center text-secondary text-sm' },
             { data: 'total_stock', name: 'total_stock', title: 'Stok', className: 'text-center text-secondary text-sm' },
+            { data: 'unit_satuan', name: 'unit_satuan', title: 'Unit/Satuan', className: 'text-center text-secondary text-sm' },
             { data: 'created_at', name: 'created_at', title: 'Tanggal Dibuat', className: 'text-center text-secondary text-sm' },
             { data: 'updated_at', name: 'updated_at', title: 'Tanggal Diubah', className: 'text-center text-secondary text-sm' },
             { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false, className: 'text-sm' },
@@ -115,6 +116,7 @@ $(document).ready(function () {
     function airDatepicker(el) {
         new AirDatepicker(el, {
             autoClose: true,
+            maxDate: new Date(),
             locale: {
                 days: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
                 daysShort: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
@@ -131,7 +133,7 @@ $(document).ready(function () {
             position: 'top left',
             buttons: ['clear'],
             onSelect: function (selectedDates, dateStr, instance) {
-                console.log(selectedDates);
+                // console.log(selectedDates);
                 // console.log(selectedDates.formattedDate);
                 $(el).val(selectedDates.formattedDate).valid();
             }
@@ -229,7 +231,7 @@ $(document).ready(function () {
                 el.find('#mainContent').html(result.html);
             },
             error: function (err) {
-                console.log(err.statusText);
+                // console.log(err);
                 notifToast("error", err.statusText);
             },
             complete: function () {
@@ -301,6 +303,28 @@ $(document).ready(function () {
             }
         });
     }
+    function ajaxAddStockProduct(el){
+        $.ajax({
+            type: "POST",
+            url: baseUrl + "/products/add-stock-product-action/ajax-modal",
+            data: new FormData($(el).get(0)),
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function (result) {
+                // console.log(result);
+                notifToast(result.status, result.message);
+                if (result.status == "success") {
+                    $("#fm_addStockProduct").trigger("reset");
+                    $('#mdProduct').modal('hide');
+                    tbProduct.ajax.reload();
+                }
+            },
+            error: function (err) {
+                notifToast("error", err.statusText);
+            }
+        });
+    }
     function ajaxEditProduct(el) {
         $.ajax({
             type: "POST",
@@ -341,8 +365,20 @@ $(document).ready(function () {
             var ele = $(this).find(':submit').data('el');
             var el = $(ele);
             if (el.valid()) {
-                var title = ele === '#fm_addProduct' ? 'Add Product' : 'Edit Product';
-                var text = ele === '#fm_addProduct' ? 'add product (' + val + ')?' : 'edit product (' + val + ')?';
+                switch (ele) {
+                    case '#fm_addProduct':
+                        var title = 'Add Product';
+                        var text = 'add product (' + val + ')?';
+                        break;
+                    case '#fm_addStockProduct':
+                        var title = "Add Stock Product";
+                        var text = 'add stock product (' + val + ')?';
+                        break;
+                    default:
+                        var title = 'Edit Product';
+                        var text = 'edit product (' + val + ')?';
+                        break;
+                }
                 $.confirm({
                     theme: 'modern',
                     icon: 'fa fa-question',
@@ -356,7 +392,17 @@ $(document).ready(function () {
                             text: 'Sure!',
                             btnClass: 'btn-purple',
                             action: function () {
-                                title === 'Add Product' ? ajaxAddProduct(el) : ajaxEditProduct(el);
+                                switch (title) {
+                                    case 'Add Product':
+                                        ajaxAddProduct(el)
+                                        break;
+                                    case 'Add Stock Product':
+                                        ajaxAddStockProduct(el)
+                                        break;
+                                    default:
+                                        ajaxEditProduct(el)
+                                        break;
+                                }
                             }
                         },
                         cancel: function () {
@@ -405,7 +451,7 @@ async function onFileSelected(event) {
 
     } catch(e) {
       // 4) Display errors.
-      console.log(`Error: ${e.message}`)
+    //   console.log(`Error: ${e.message}`)
       document.querySelector('#image_preview').innerHTML = ``
     //   document.querySelector('#image_preview').innerHTML = `Please try another file:<br/><br/>${e.message}`
     }

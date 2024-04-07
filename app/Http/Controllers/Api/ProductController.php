@@ -36,7 +36,6 @@ class ProductController extends Controller
                     $img = asset('storage/product/img/' . $data->image);
                     $html = '<img src="' . $img . '" class="avatar avatar-sm" alt="Image ' . $data->product_name . '"/>';
                     return $html;
-
                 })
                 ->addColumn('product_code', function ($data) {
                     return $data->product_code;
@@ -53,6 +52,9 @@ class ProductController extends Controller
                 ->addColumn('total_stock', function ($data) {
                     return $data->total_stock;
                 })
+                ->addColumn('unit_satuan', function ($data) {
+                    return $data->unit_satuan;
+                })
                 ->addColumn('created_at', function ($data) {
                     return Carbon::parse($data->created_at)->translatedFormat('d/m/Y H:i');
                 })
@@ -67,7 +69,7 @@ class ProductController extends Controller
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5" style="z-index: 999!important;"
                     aria-labelledby="dropdownTable" >
-                    <li><a class="dropdown-item border-radius-md" href="'.url('products/detail/'.$data->id).'"><i class="fa fa-eye me-2"></i> Detail </a></li>
+                    <li><a class="dropdown-item border-radius-md" href="' . url('products/detail/' . $data->id) . '"><i class="fa fa-eye me-2"></i> Detail </a></li>
                     <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
                             data-bs-target="#mdProduct" data-type="addStock" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-plus me-2"></i> Add Stock</a></li>
                     <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
@@ -104,17 +106,18 @@ class ProductController extends Controller
                 'product_name' => 'required|max:255',
                 'product_code' => 'required|unique:products|max:255',
                 'category_id' => 'required',
-                'supplier_id' => 'required',
-                'buying_price' => 'required',
-                'selling_price' => 'required',
-                'buying_date' => 'required',
-                'product_quantity' => 'required',
+                'supplier_id.*' => 'required',
+                'buying_price.*' => 'required',
+                'selling_price.*' => 'required',
+                'buying_date.*' => 'required',
+                'product_quantity.*' => 'required',
                 'image' => 'mimes:jpg,jpeg,png|max:5048',
             ]);
             if ($validators->fails()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => $validators->errors()]);
+                    'message' => $validators->errors()
+                ]);
             }
             $imgProduct = NULL;
             $supplierId = $request->supplier_id;
@@ -124,12 +127,12 @@ class ProductController extends Controller
             $sellingPrice = $request->selling_price;
             $buyingDate = $request->buying_date;
             $unique = array_unique($supplierId);
-                if (count($unique) < count($supplierId)) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Supplier tidak boleh sama'
-                    ]);
-                }
+            if (count($unique) < count($supplierId)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Supplier tidak boleh sama'
+                ]);
+            }
             if (!is_null($request->file('image'))) {
                 $imgProduct = explode('/', $request->file('image')->store('product/img/'));
                 $imgProduct = end($imgProduct);
@@ -154,7 +157,7 @@ class ProductController extends Controller
                 $product_supplier->buying_date = Carbon::createFromFormat('d/m/Y', $buyingDate[$i])->format('Y-m-d');
                 $product_supplier->save();
             }
-            for ($k=0; $k < count($sellingPriceType); $k++) {
+            for ($k = 0; $k < count($sellingPriceType); $k++) {
                 $product_selling = new ProductSellingPrice;
                 $product_selling->product_id = $product_id;
                 $product_selling->type = $sellingPriceType[$k];
@@ -174,7 +177,6 @@ class ProductController extends Controller
                 'message' => $e->getMessage()
             ]);
         }
-
     }
 
     //----------------------------Show(id)-------------------------------------------
@@ -186,14 +188,22 @@ class ProductController extends Controller
             }
         }
         $product = DB::table('products')
-        ->join('categories', 'products.category_id', 'categories.id')
-        ->where('products.id', $id)
-        ->select('categories.category_name', 'products.*')->first();
+            ->join('categories', 'products.category_id', 'categories.id')
+            ->where('products.id', $id)
+            ->select('categories.category_name', 'products.*')
+            ->first();
         $productSupplier = DB::table('product_suppliers as ps')
-        ->join('suppliers', 'ps.supplier_id', 'suppliers.id')
-        ->where('ps.product_id', $id)
-        ->select('ps.*', 'suppliers.name as supplier_name')
-        ->get();
+            ->join('suppliers', 'ps.supplier_id', 'suppliers.id')
+            ->where('ps.product_id', $id)
+            ->orderBy('ps.id', 'ASC')
+            ->groupBy('ps.supplier_id')
+            ->select(
+                'ps.*',
+                'suppliers.name as supplier_name',
+                DB::raw('COUNT(ps.supplier_id) as supplier_count'),
+            )
+            ->get();
+        // dd($productSupplier);
         $productSelling = DB::table('product_selling_prices')->where('product_id', $id)->get();
         return view('pages.product.detail', [
             'product' => $product,
@@ -282,7 +292,7 @@ class ProductController extends Controller
             $html = '';
             $html .= '<div class="row">
             <div class="col-12 text-center">
-            ' . $barcode->getBarcodeSVG($data->product_code, "C128",3,80, 'black') . '
+            ' . $barcode->getBarcodeSVG($data->product_code, "C128", 3, 80, 'black') . '
             </div>
             </div>';
             return response()->json([
@@ -309,9 +319,12 @@ class ProductController extends Controller
                 case 'addStock':
                     return self::showModalAddStock($request);
                     break;
+                case 'add-stock-product-action':
+                    return self::storeAddStockProduct($request);
+                    break;
                 default:
                     return abort(404);
-                break;
+                    break;
             }
         }
         return abort(400);
@@ -441,37 +454,52 @@ class ProductController extends Controller
         $name = $request->name;
         $prod = Product::find($id);
         $data = DB::table('product_suppliers as a')
-        ->join('suppliers as b', 'a.supplier_id','=', 'b.id')
-        ->where('a.product_id',$id)->orderBy('a.id', 'ASC')
-        ->select('a.*', 'b.name as supplier_name')
-        ->get();
-        $title = '<i class="fa fa-plus me-2"></i> Add Stock ('.$name.')';
-        $html ='';
-        $html ='<div class="row">
+            ->join('suppliers as b', 'a.supplier_id', '=', 'b.id')
+            ->where('a.product_id', $id)->orderBy('a.id', 'ASC')
+            ->select(
+                'a.*',
+                'b.name as supplier_name',
+            )
+            ->get();
+        $title = '<i class="fa fa-plus me-2"></i> Add Stock (' . $name . ')';
+        $html = '';
+        $html = '<div class="row">
+        <h6>Riwayat</h6>
         <div class="col-md-12 table-responsive">
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th class="text-center">Supplier Name</th>
-                        <th class="text-center">Quantity</th>
                         <th class="text-center">Buying Price</th>
                         <th class="text-center">Buying Date</th>
+                        <th class="text-center">Created At</th>
+                        <th class="text-center">Quantity</th>
+
                     </tr>
                 </thead>
                 <tbody>';
         foreach ($data as $key => $value) {
             $html .= '<tr>
-                        <td class="text-center">'.$value->supplier_name.'</td>
-                        <td class="text-center">'.$value->product_qty.' '.$prod->unit_satuan .'</td>
-                        <td class="text-center">'.$value->buying_price.'</td>
-                        <td class="text-center">'.Carbon::parse($value->buying_date)->format('d F Y').'</td>
+                        <td class="text-center">' . $value->supplier_name . '</td>
+                        <td class="text-center">Rp.' . number_format($value->buying_price) . '</td>
+                        <td class="text-center">' . Carbon::parse($value->buying_date)->format('d F Y') . '</td>
+                        <td class="text-center">' . Carbon::parse($value->created_at)->format('d F Y') . '</td>
+                        <td class="text-center">' . $value->product_qty . ' ' . $prod->unit_satuan . '</td>
                     </tr>';
         }
-        $html .='</tbody>
+        $html .= '</tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-bold text-end text-uppercase">Total:</td>
+                    <td class="text-bold text-center">' . $prod->total_stock . ' ' . $prod->unit_satuan . '</td>
+                </tr>
+            </tfoot>
             </table>
         </div>
         </div>';
         $html .= '<form id="fm_addStockProduct">
+        <input type="hidden" name="product_id" value="' . $id . '">
+        <input type="hidden" name="product_name" value="' . $prod->product_name . '">
         <div class="row input_fields_wrap">
         <div class="form-group col-md-3">
             <div class="d-flex justify-content-between">
@@ -494,13 +522,60 @@ class ProductController extends Controller
             <label for="buying_dateField" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
             <input type="text" name="buying_date[]" id="buying_dateField" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
         </div>
-    </div>
-    </form>';
+        </div>
+        </form>';
         $idForm = 'fm_addStockProduct';
         return [
             'title' => $title,
             'html' => $html,
             'idForm' => $idForm
         ];
+    }
+    protected function storeAddStockProduct($request)
+    {
+        try {
+            $validators = Validator::make($request->all(), [
+                'supplier_id.*' => 'required',
+                'buying_price.*' => 'required',
+                'buying_date.*' => 'required',
+                'product_quantity.*' => 'required',
+            ]);
+            if ($validators->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $validators->errors()
+                ]);
+            }
+            $supplierId = $request->supplier_id;
+            $buyingPrice = $request->buying_price;
+            $productQuantity = $request->product_quantity;
+            $buyingDate = $request->buying_date;
+            $unique = array_unique($supplierId);
+            if (count($unique) < count($supplierId)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Supplier tidak boleh sama'
+                ]);
+            }
+            DB::beginTransaction();
+            for ($i = 0; $i < count($supplierId); $i++) {
+                $product_supplier = new ProductSupplier;
+                $product_supplier->product_id = $request->product_id;
+                $product_supplier->supplier_id = $supplierId[$i];
+                $product_supplier->buying_price = $buyingPrice[$i];
+                $product_supplier->product_qty = $productQuantity[$i];
+                $product_supplier->buying_date = Carbon::createFromFormat('d/m/Y', $buyingDate[$i])->format('Y-m-d');
+                $product_supplier->save();
+            }
+            DB::table('products')->where('id', $request->product_id)->increment('total_stock', array_sum($productQuantity));
+            DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Product stock successfully added'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return abort($e->getCode(), $e->getMessage());
+        }
     }
 }
