@@ -83,10 +83,10 @@
                                                     <tr>
                                                         <td class="text-dark">
                                                             @if ($psup->supplier_count > 1)
-                                                                <a class="btn-toggle-collapse"
+                                                                <a class="btn-toggle-collapse text-gradient text-dark"
                                                                     id="btn-toggle-collapse{{ $i + 1 }}"
                                                                     data-bs-toggle="collapse"
-                                                                    href="#collapse{{ $i + 1 }}" role="button"
+                                                                    href="#supplier{{ $i + 1 }}" role="button"
                                                                     aria-expanded="false"
                                                                     aria-controls="collapse{{ $i + 1 }}">
                                                                     <i class="fas fa-plus-circle"></i></a>
@@ -106,45 +106,9 @@
                                                     </tr>
                                                     <tr>
                                                         <td colspan="5">
-                                                            <table class="table collapse" id="collapse{{ $i + 1 }}">
-                                                                <tbody>
-                                                                    @if ($psup->supplier_count > 1)
-                                                                        @php
-                                                                            $supData = DB::table('product_suppliers as ps')
-                                                                                ->join(
-                                                                                    'suppliers',
-                                                                                    'ps.supplier_id',
-                                                                                    'suppliers.id',
-                                                                                )
-                                                                                ->where('ps.product_id', $psup->product_id)
-                                                                                ->where('ps.supplier_id', $psup->supplier_id)
-                                                                                ->orderBy('ps.id', 'ASC')
-                                                                                ->select(
-                                                                                    'ps.*',
-                                                                                    'suppliers.name as supplier_name'
-                                                                                )
-                                                                                ->get();
-                                                                        @endphp
-                                                                        @foreach ($supData as $k => $sd)
-                                                                        @if ($k != 0)
-
-                                                                        <tr>
-                                                                            <td class="text-dark text-center"><i class="fa fa-genderless text-sm text-gradient text-primary"></i> {{ $sd->supplier_name }}</td>
-                                                                            <td class="text-dark text-center">
-                                                                                {{ $sd->product_qty . ' ' . $product->unit_satuan }}</td>
-                                                                            <td class="text-dark text-center">@format_rupiah($sd->buying_price)</td>
-                                                                            <td class="text-dark text-center">
-                                                                                {{ Carbon\Carbon::parse($sd->buying_date)->translatedFormat('d M Y') }}
-                                                                            </td>
-                                                                            <td class="text-dark text-center">
-                                                                                {{ Carbon\Carbon::parse($sd->created_at)->translatedFormat('d M Y') }}
-                                                                            </td>
-                                                                        </tr>
-                                                                        @endif
-                                                                        @endforeach
-                                                                    @endif
-                                                                </tbody>
-                                                            </table>
+                                                            <div class="collapse" id="supplier{{ $i + 1 }}" data-indexcol="{{ $i + 1 }}" data-product-id="{{ $psup->product_id }}" data-supplier-id="{{ $psup->supplier_id }}" data-unit="{{ $product->unit_satuan }}">
+                                                                <div id="contentTable{{$i+1}}"></div>
+                                                            </div>
                                                             {{-- <div class="collapse" id="collapse{{$i+1}}">
                                                             <div class="card card-body">
                                                               Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.

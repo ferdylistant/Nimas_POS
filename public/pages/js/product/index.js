@@ -49,8 +49,8 @@ $(document).ready(function () {
             window.location.reload();
         }
     };
-    function select2Category() {
-        $('.select-category').select2({
+    async function select2Category() {
+        await $('.select-category').select2({
             placeholder: 'Choose category',
             allowClear: true,
             dropdownParent: $("#mdProduct"),
@@ -81,8 +81,8 @@ $(document).ready(function () {
             }
         });
     }
-    function select2Supplier() {
-        $('.select-supplier').each(function (e) {
+    async function select2Supplier() {
+        await $('.select-supplier').each(function (e) {
             $(this).select2({
                 placeholder: 'Choose supplier',
                 allowClear: true,
@@ -216,8 +216,25 @@ $(document).ready(function () {
         });
 
     }
-    function ajaxModalProduct(el, type, id, name) {
-        $.ajax({
+    function selectedOptionEditProduct(result) {
+        $("#categoryField").select2("trigger", "select", {
+            data: {
+                id: result.category.id,
+                text: result.category.category_name
+            }
+        });
+        // Object.entries(result.supplier).forEach((entry) => {
+        //     let [key, value] = entry;
+        //     $("#operatorId").select2("trigger", "select", {
+        //         data: {
+        //             id: value.id,
+        //             text: value.nama
+        //         }
+        //     })
+        // });
+    }
+    async function ajaxModalProduct(el, type, id, name) {
+        await $.ajax({
             type: "GET",
             url: baseUrl + "/products/" + type + "/ajax-modal",
             data: {
@@ -229,6 +246,11 @@ $(document).ready(function () {
                 el.find(':submit').data('el', '#' + result.idForm);
                 el.find(':submit').attr('form', result.idForm);
                 el.find('#mainContent').html(result.html);
+                select2Category();
+                select2Supplier();
+                if (type == 'edit') {
+                    selectedOptionEditProduct(result);
+                }
             },
             error: function (err) {
                 // console.log(err);
@@ -275,14 +297,12 @@ $(document).ready(function () {
                     }
                 });
                 ajaxClickAddMore();
-                select2Category();
-                select2Supplier();
                 airDatepicker('#buying_dateField');
             }
         });
     }
-    function ajaxAddProduct(el) {
-        $.ajax({
+    async function ajaxAddProduct(el) {
+        await $.ajax({
             type: "POST",
             url: baseUrl + "/products/store",
             data: new FormData($(el).get(0)),
@@ -303,8 +323,8 @@ $(document).ready(function () {
             }
         });
     }
-    function ajaxAddStockProduct(el){
-        $.ajax({
+    async function ajaxAddStockProduct(el){
+        await $.ajax({
             type: "POST",
             url: baseUrl + "/products/add-stock-product-action/ajax-modal",
             data: new FormData($(el).get(0)),
@@ -325,8 +345,8 @@ $(document).ready(function () {
             }
         });
     }
-    function ajaxEditProduct(el) {
-        $.ajax({
+    async function ajaxEditProduct(el) {
+        await $.ajax({
             type: "POST",
             url: baseUrl + "/category/update",
             data: new FormData($(el).get(0)),
@@ -346,11 +366,12 @@ $(document).ready(function () {
         });
     }
     $('#mdProduct').on({
-        'shown.bs.modal': function (e) {
+        'show.bs.modal': function (e) {
             var type = $(e.relatedTarget).data('type');
             var id = $(e.relatedTarget).data('id');
             var name = $(e.relatedTarget).data('name');
             var el = $(this);
+            $('#mainContent').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
             ajaxModalProduct(el, type, id, name);
         },
         'hidden.bs.modal': function () {

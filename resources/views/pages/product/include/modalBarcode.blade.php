@@ -13,7 +13,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn bg-gradient-primary"><i class="fas fa-print"></i> Print</button>
+                <button type="submit" class="btn bg-gradient-primary" onclick="window.print();"><i class="fas fa-print"></i> Print</button>
             </div>
         </div>
     </div>

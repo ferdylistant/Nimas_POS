@@ -185,6 +185,8 @@ class ProductController extends Controller
         if (request()->ajax()) {
             if (request()->req == 'get-barcode') {
                 return self::getModalBarcode($id);
+            } elseif (request()->req == 'get-supplier') {
+                return self::getCollapseSupplier(request()->supplierId, $id, request()->unitSatuan);
             }
         }
         $product = DB::table('products')
@@ -305,6 +307,40 @@ class ProductController extends Controller
                 'message' => $e->getMessage()
             ]);
         }
+    }
+    protected function getCollapseSupplier($supId, $prodId, $unitSatuan)
+    {
+        $html = '';
+        $supData = DB::table('product_suppliers as ps')
+            ->join(
+                'suppliers',
+                'ps.supplier_id',
+                'suppliers.id',
+            )
+            ->where('ps.product_id', $prodId)
+            ->where('ps.supplier_id', $supId)
+            ->orderBy('ps.id', 'ASC')
+            ->select(
+                'ps.*',
+                'suppliers.name as supplier_name'
+            )
+            ->get();
+        $html .= '<table class="table table-striped">
+            <tbody>';
+        foreach ($supData as $k => $sd) {
+            if ($k != 0) {
+
+                $html .= '<tr>
+                <td class="text-dark text-center"><i class="fa fa-genderless text-sm text-gradient text-primary"></i> ' . $sd->supplier_name . '</td>
+                <td class="text-dark text-center">' . $sd->product_qty . ' ' . $unitSatuan . '</td>
+                <td class="text-dark text-center">Rp. ' . number_format($sd->buying_price) . '</td>
+                <td class="text-dark text-center">' . Carbon::parse($sd->buying_date)->translatedFormat('d M Y') . '</td>
+                <td class="text-dark text-center">' . Carbon::parse($sd->created_at)->translatedFormat('d M Y') . '</td>
+            </tr>';
+            }
+        }
+        $html .= '</tbody></table>';
+        return $html;
     }
     public function ajaxModal(Request $request)
     {
@@ -447,6 +483,114 @@ class ProductController extends Controller
     }
     protected function showModalEdit($request)
     {
+        $id = $request->id;
+        $product = Product::find($id);
+        $category = Category::find($product->category_id);
+        $supplier = DB::table('product_suppliers as a')
+            ->join('suppliers as b', 'a.supplier_id', '=', 'b.id')
+            ->where('a.product_id', $id)->orderBy('a.id', 'ASC')
+            ->select(
+                'a.*',
+                'b.name as supplier_name',
+            )->get();
+        $data = DB::table('product_suppliers as a')
+            ->join('suppliers as b', 'a.supplier_id', '=', 'b.id')
+            ->where('a.product_id', $id)->orderBy('a.id', 'ASC')
+            ->select(
+                'a.*',
+                'b.name as supplier_name',
+            )
+            ->get();
+        $title = '<i class="fa fa-edit me-2"></i> Edit Product (' . $product->product_name . ')';
+        $idForm = 'fm_editProduct';
+        $html = '';
+        $html .= '<form id="fm_editProduct">';
+        $html .= csrf_field();
+        $html .= '<div class="row">
+                <div class="form-group col-md-12">
+                    <label for="categoryField" class="col-form-label">Category Name: <span class="text-danger">*</span></label>
+                    <select name="category_id" id="categoryField" class="form-control select-category" required>
+                        <option label="Choose One"></option>
+                    </select>
+                    <span id="err_category_id"></span>
+                </div>
+            </div>
+            <div class="row input_fields_wrap">
+                <div class="form-group col-md-3">
+                    <div class="d-flex justify-content-between">
+                        <label for="supplierField" class="col-form-label">Supplier Name: <span class="text-danger">*</span></label>
+                        <button type="button" class="btn btn-primary btn-sm rounded btnAddSupplier" title="Add Supplier"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <select name="supplier_id[]" id="supplierField" class="form-control form-control-sm select-supplier" required>
+                        <option label="Choose One"></option>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="product_amountField" class="col-form-label mb-2">Amount: <span class="text-danger">*</span></label>
+                    <input type="number" name="product_quantity[]" id="product_amountField" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="buying_priceField" class="col-form-label mb-2">Buying Price: <span class="text-danger">*</span></label>
+                    <input type="number" name="buying_price[]" id="buying_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Buying Price" required>
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="buying_dateField" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
+                    <input type="text" name="buying_date[]" id="buying_dateField" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label for="unit_satuanField" class="col-form-label mb-2">Unit/Satuan: <span class="text-danger">*</span></label>
+                    <input type="text" name="unit_satuan" id="unit_satuanField" class="form-control form-control-sm" value="' . $product->unit_satuan . '" placeholder="Enter Product Name" required>
+                    <span id="err_unit_satuan"></span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="product_nameField" class="col-form-label mb-2">Product Name: <span class="text-danger">*</span></label>
+                    <input type="text" name="product_name" id="product_nameField" class="form-control form-control-sm" value="' . $product->product_name . '" placeholder="Enter Product Name" required>
+                    <span id="err_product_name"></span>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="kodeField" class="col-form-label">Kode: <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-sm">
+                    <input type="text" name="product_code" id="kodeField" class="form-control form-control-sm" value="' . $product->product_code . '" placeholder="Enter/Scan Product Code" required>
+                    <div class="input-group-append">
+                        <span class="input-group-text text-primary">
+                            <a href="javascript:void(0)" class="btnCheckProductCode" title="Check Product Code"><i class="fas fa-barcode"></i></a>
+                        </span>
+                    </div>
+                    <span id="err_product_code"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row input_fields_wrap_selling">
+                <div class="form-group col-md-6">
+                    <div class="d-flex justify-content-between">
+                        <label for="selling_price_typeField" class="col-form-label mb-2">Selling Price Type: <span class="text-danger">*</span></label>
+                        <button type="button" class="btn btn-primary btn-sm rounded btnAddSellingPrice" title="Add Selling Price"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <input type="text" name="selling_price_type[]" id="selling_price_typeField" class="form-control form-control-sm" placeholder="Enter Selling Price Type" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="selling_priceField" class="col-form-label mb-2">Selling Price: <span class="text-danger">*</span></label>
+                    <input type="number" name="selling_price[]" id="selling_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Selling Price" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <label for="imageField" class="col-form-label mb-2">Image: <span class="text-danger">*</span></label>
+                    <input type="file" name="image" id="imageField" onchange="onFileSelected(event)" class="form-control form-control-sm" required>
+                    <span id="err_image"></span>
+                </div>
+                <div id="image_preview"></div>
+            </div>
+            </form>';
+        return [
+            'title' => $title,
+            'html' => $html,
+            'idForm' => $idForm,
+            'category' => $category,
+            'supplier' => $supplier
+        ];
     }
     protected function showModalAddStock($request)
     {
