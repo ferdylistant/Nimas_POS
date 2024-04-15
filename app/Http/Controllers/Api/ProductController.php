@@ -405,7 +405,7 @@ class ProductController extends Controller
                 </div>
             </div>
             <div class="row input_fields_wrap">
-                <div class="form-group col-md-3">
+                <div class="form-group col-md-3" data-sort="1">
                     <div class="d-flex justify-content-between">
                         <label for="supplierField" class="col-form-label">Supplier Name: <span class="text-danger">*</span></label>
                         <button type="button" class="btn btn-primary btn-sm rounded btnAddSupplier" title="Add Supplier"><i class="fas fa-plus"></i></button>
@@ -424,7 +424,7 @@ class ProductController extends Controller
                 </div>
                 <div class="form-group col-md-3">
                     <label for="buying_dateField" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
-                    <input type="text" name="buying_date[]" id="buying_dateField" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
+                    <input type="text" name="buying_date[]" id="buying_dateField" class="form-control form-control-sm buying_date_cls" placeholder="Pick buying date" readonly required>
                 </div>
             </div>
             <div class="row">
@@ -493,6 +493,7 @@ class ProductController extends Controller
                 'a.*',
                 'b.name as supplier_name',
             )->get();
+        $sellingPrice = ProductSellingPrice::where('product_id', $id)->get();
         $data = DB::table('product_suppliers as a')
             ->join('suppliers as b', 'a.supplier_id', '=', 'b.id')
             ->where('a.product_id', $id)->orderBy('a.id', 'ASC')
@@ -515,8 +516,10 @@ class ProductController extends Controller
                     <span id="err_category_id"></span>
                 </div>
             </div>
-            <div class="row input_fields_wrap">
-                <div class="form-group col-md-3">
+            <div class="row input_fields_wrap">';
+            foreach ($data as $key => $value) {
+                if ($key == 0) {
+                    $html .= '<div class="form-group col-md-3" data-sort="1">
                     <div class="d-flex justify-content-between">
                         <label for="supplierField" class="col-form-label">Supplier Name: <span class="text-danger">*</span></label>
                         <button type="button" class="btn btn-primary btn-sm rounded btnAddSupplier" title="Add Supplier"><i class="fas fa-plus"></i></button>
@@ -527,17 +530,42 @@ class ProductController extends Controller
                 </div>
                 <div class="form-group col-md-3">
                     <label for="product_amountField" class="col-form-label mb-2">Amount: <span class="text-danger">*</span></label>
-                    <input type="number" name="product_quantity[]" id="product_amountField" min="1" class="form-control form-control-sm" placeholder="Enter Amount" required>
+                    <input type="number" name="product_quantity[]" id="product_amountField" min="1" class="form-control form-control-sm" value="'.$value->product_qty.'" placeholder="Enter Amount" required>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="buying_priceField" class="col-form-label mb-2">Buying Price: <span class="text-danger">*</span></label>
-                    <input type="number" name="buying_price[]" id="buying_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Buying Price" required>
+                    <input type="number" name="buying_price[]" id="buying_priceField" min="1" class="form-control form-control-sm" value="'.$value->buying_price.'" placeholder="Enter Buying Price" required>
                 </div>
                 <div class="form-group col-md-3">
-                    <label for="buying_dateField" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
-                    <input type="text" name="buying_date[]" id="buying_dateField" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
-                </div>
-            </div>
+                    <label for="buying_dateField1" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
+                    <input type="text" name="buying_date[]" id="buying_dateField1" class="form-control form-control-sm buying_date_cls" value="'.Carbon::parse($value->buying_date)->format('d/m/Y').'" placeholder="Pick buying date" readonly required>
+                </div>';
+                } else {
+                    $i = $key + 1;
+                    $html .= '<div class="row field-more">
+                    <div class="form-group col-md-3" data-sort="'.$i.'">
+                        <select name="supplier_id[]" id="supplierFieldMore'.$i.'" class="form-control form-control-sm select-supplier" required>
+                            <option label="Choose One"></option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <input type="number" name="product_quantity[]" id="product_amountField'.$i.'" min="1" class="form-control form-control-sm" value="'.$value->product_qty.'" placeholder="Enter Amount" required>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <input type="number" name="buying_price[]" id="buying_priceField'.$i.'" min="1" class="form-control form-control-sm" value="'.$value->buying_price.'" placeholder="Enter Buying Price" required>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="buying_date[]" id="buying_dateField'.$i.'" class="form-control form-control-sm buying_date_cls" value="'.Carbon::parse($value->buying_date)->format('d/m/Y').'" placeholder="Pick buying date" readonly required>
+                            <div class="input-group-append">
+                                <span class="input-group-text"><a href="javascript:void(0)" class="remove_field_supplier text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
+                            </div>
+                        </div>
+                    </div>
+                    </div>';
+                }
+            }
+            $html .='</div>
             <div class="row">
                 <div class="form-group col-md-4">
                     <label for="unit_satuanField" class="col-form-label mb-2">Unit/Satuan: <span class="text-danger">*</span></label>
@@ -562,8 +590,10 @@ class ProductController extends Controller
                     </div>
                 </div>
             </div>
-            <div class="row input_fields_wrap_selling">
-                <div class="form-group col-md-6">
+            <div class="row input_fields_wrap_selling">';
+            foreach ($sellingPrice as $key => $value) {
+                if ($key == 0) {
+                $html .='<div class="form-group col-md-6">
                     <div class="d-flex justify-content-between">
                         <label for="selling_price_typeField" class="col-form-label mb-2">Selling Price Type: <span class="text-danger">*</span></label>
                         <button type="button" class="btn btn-primary btn-sm rounded btnAddSellingPrice" title="Add Selling Price"><i class="fas fa-plus"></i></button>
@@ -573,8 +603,27 @@ class ProductController extends Controller
                 <div class="form-group col-md-6">
                     <label for="selling_priceField" class="col-form-label mb-2">Selling Price: <span class="text-danger">*</span></label>
                     <input type="number" name="selling_price[]" id="selling_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Selling Price" required>
-                </div>
-            </div>
+                </div>';
+                } else {
+                    $i = $key + 1;
+                    $html .='<div class="row field-more-selling">
+                        <div class="form-group col-md-6" data-sortselling="' . $i . '">
+                            <input type="text" name="selling_price_type[]" id="selling_price_typeField'.$i.'" class="form-control form-control-sm" value="' . $value->type . '" placeholder="Enter Selling Price Type" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <div class="input-group input-group-sm">
+                                <input type="number" name="selling_price[]" id="selling_priceField'.$i.'" min="1" class="form-control form-control-sm" value="' . $value->selling_price . '" placeholder="Enter Selling Price" required>
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><a href="javascript:void(0)" class="remove_field_selling_price text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>';
+                }
+
+            }
+
+            $html .='</div>
             <div class="row">
                 <div class="form-group col-md-12">
                     <label for="imageField" class="col-form-label mb-2">Image: <span class="text-danger">*</span></label>
@@ -589,7 +638,8 @@ class ProductController extends Controller
             'html' => $html,
             'idForm' => $idForm,
             'category' => $category,
-            'supplier' => $supplier
+            'supplier' => $supplier,
+            'dataSup' => $data
         ];
     }
     protected function showModalAddStock($request)

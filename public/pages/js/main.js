@@ -1,6 +1,11 @@
 $.ajaxSetup({
     headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    },
+    statusCode: {
+        401: function() {
+            window.location.reload();
+        }
     }
 });
 function jqueryValidation_(element, rules, messages = {}) {

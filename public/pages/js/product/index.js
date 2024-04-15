@@ -133,7 +133,6 @@ $(document).ready(function () {
             position: 'top left',
             buttons: ['clear'],
             onSelect: function (selectedDates, dateStr, instance) {
-                // console.log(selectedDates);
                 // console.log(selectedDates.formattedDate);
                 $(el).val(selectedDates.formattedDate).valid();
             }
@@ -144,8 +143,10 @@ $(document).ready(function () {
         var max_fields = 20; //maximum input boxes allowed
         var wrapper = $('.input_fields_wrap'); //Fields wrapper
         var wrapperS = $('.input_fields_wrap_selling'); //Fields wrapper
-        var x = 1; //initlal text box count
-        var y = 1; //initlal text box count
+        var sort = wrapper.find('[data-sort]').length;
+        var sortSell = wrapper.find('[data-sortselling]').length;
+        var x = sort; //initlal text box count
+        var y = sortSell; //initlal text box count
         $('.btnAddSupplier').click(function (e) {
             // console.log(e);
             //on add input button click
@@ -167,7 +168,7 @@ $(document).ready(function () {
             </div>
             <div class="form-group col-md-3">
                 <div class="input-group input-group-sm">
-                <input type="text" name="buying_date[]" id="buying_dateField`+x+`" class="form-control form-control-sm" placeholder="Pick buying date" readonly required>
+                <input type="text" name="buying_date[]" id="buying_dateField`+x+`" class="form-control form-control-sm buying_date_cls" placeholder="Pick buying date" readonly required>
                 <div class="input-group-append">
                         <span class="input-group-text"><a href="javascript:void(0)" class="remove_field_supplier text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
                     </div>
@@ -177,10 +178,10 @@ $(document).ready(function () {
                 );
                 select2Supplier();
                 airDatepicker("#buying_dateField"+x);
+                // airDatepicker(".buying_date_cls");
             }
         });
         $(wrapper).on("click", ".remove_field_supplier", function (e) {
-            console.log('supplier');
             //user click on remove text
             e.preventDefault();
             $(this).closest(".field-more").remove();
@@ -208,7 +209,6 @@ $(document).ready(function () {
             }
         });
         $(wrapperS).on("click", ".remove_field_selling_price", function (e) {
-            console.log('selling price');
             //user click on remove text
             e.preventDefault();
             $(this).closest(".field-more-selling").remove();
@@ -246,17 +246,6 @@ $(document).ready(function () {
                 el.find(':submit').data('el', '#' + result.idForm);
                 el.find(':submit').attr('form', result.idForm);
                 el.find('#mainContent').html(result.html);
-                select2Category();
-                select2Supplier();
-                if (type == 'edit') {
-                    selectedOptionEditProduct(result);
-                }
-            },
-            error: function (err) {
-                // console.log(err);
-                notifToast("error", err.statusText);
-            },
-            complete: function () {
                 let valid = jqueryValidation_("#fm_" + type + "Product", {
                     category_name: {
                         required: true,
@@ -296,8 +285,52 @@ $(document).ready(function () {
                         extension: "jpg|png|jpeg|webp"
                     }
                 });
+                select2Category();
+                select2Supplier();
+                if (type == 'edit') {
+                    selectedOptionEditProduct(result);
+                    Object.entries(result.dataSup).forEach(entry => {
+                        'use strict'
+                        let [key, value] = entry;
+                        if (key != 0) {
+                            var i = parseInt(key) + 1;
+                        }
+                        new AirDatepicker(key == 0 ? "#buying_dateField1" : '#buying_dateField'+i, {
+                            autoClose: true,
+                            maxDate: new Date(),
+                            locale: {
+                                days: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+                                daysShort: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                                daysMin: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                                months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                                monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'],
+                                today: 'Hari ini',
+                                clear: 'Hapus',
+                                dateFormat: 'dd/MM/yyyy',
+                                timeFormat: 'hh:mm aa',
+                                firstDay: 1
+                            },
+                            container: "#mdProduct",
+                            position: 'top left',
+                            buttons: ['clear'],
+                            selectedDates: value.buying_date,
+                            onSelect: function (selectedDates, dateStr, instance) {
+                                // console.log(selectedDates.formattedDate);
+                                $(key == 0 ? "#buying_dateField1" : '#buying_dateField'+i).val(selectedDates.formattedDate).valid();
+                            }
+
+                        });
+                    })
+                } else if (type == 'add') {
+                    airDatepicker('#buying_dateField');
+                }
+            },
+            error: function (err) {
+                // console.log(err);
+                notifToast("error", err.statusText);
+            },
+            complete: function () {
                 ajaxClickAddMore();
-                airDatepicker('#buying_dateField');
             }
         });
     }
