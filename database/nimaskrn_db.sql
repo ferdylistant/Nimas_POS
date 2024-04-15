@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 15, 2024 at 01:47 AM
+-- Generation Time: Apr 15, 2024 at 07:41 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -428,7 +428,30 @@ CREATE TABLE `products` (
 
 INSERT INTO `products` (`id`, `category_id`, `product_name`, `product_code`, `image`, `total_stock`, `unit_satuan`, `created_at`, `updated_at`) VALUES
 (1, 10, 'Coca-cola', '0002082669873', 'NBfOw8AwNJlyzOobGZ8gVBVIgUjB8IF0dPzjkZjc.jpg', 266, 'cup', '2024-04-07 14:48:46', '2024-04-07 14:48:46'),
-(2, 9, 'Indomie', '423423', '0j1PcpzrjRMRuGaLxF7HljtVuRB3dNXKYgnsLB2v.jpg', 82, 'pcs', '2024-04-07 14:53:54', '2024-04-07 14:53:54');
+(2, 9, 'Indomie', '423423', '0j1PcpzrjRMRuGaLxF7HljtVuRB3dNXKYgnsLB2v.jpg', 82, 'pcs', '2024-04-07 14:53:54', '2024-04-07 14:53:54'),
+(3, 12, 'Black ID', '88129919911', '9r9EF5NtxWK7DjQSltiR1ugVPhIOsMHgjRdx8S9Y.jpg', 50, 'pcs', '2024-04-15 09:22:06', '2024-04-15 09:22:06');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `product_histories`
+--
+
+CREATE TABLE `product_histories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `product_id` bigint(20) UNSIGNED NOT NULL,
+  `type_history` enum('create','update','add_stock') NOT NULL,
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`content`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_by` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `product_histories`
+--
+
+INSERT INTO `product_histories` (`id`, `product_id`, `type_history`, `content`, `created_at`, `created_by`) VALUES
+(1, 3, 'create', '{\"text\":\"Product Black ID dibuat.\"}', '2024-04-15 16:22:06', 1);
 
 -- --------------------------------------------------------
 
@@ -452,7 +475,9 @@ CREATE TABLE `product_selling_prices` (
 INSERT INTO `product_selling_prices` (`id`, `product_id`, `type`, `selling_price`, `created_at`, `updated_at`) VALUES
 (1, 1, 'Harga Grosir', 15000, '2024-04-07 14:48:46', '2024-04-07 14:48:46'),
 (2, 2, 'Harga Dasar', 25000, '2024-04-07 14:53:54', '2024-04-07 14:53:54'),
-(3, 2, 'Harga Grosir', 20000, '2024-04-07 14:53:54', '2024-04-07 14:53:54');
+(3, 2, 'Harga Grosir', 20000, '2024-04-07 14:53:54', '2024-04-07 14:53:54'),
+(4, 3, 'Harga Dasar', 110000, '2024-04-15 09:22:06', '2024-04-15 09:22:06'),
+(5, 3, 'Harga Grosir', 105000, '2024-04-15 09:22:06', '2024-04-15 09:22:06');
 
 -- --------------------------------------------------------
 
@@ -483,7 +508,8 @@ INSERT INTO `product_suppliers` (`id`, `product_id`, `supplier_id`, `product_qty
 (5, 2, 1, 50, '21000', '2024-04-08', '2024-04-07 14:53:54', '2024-04-07 14:53:54'),
 (6, 1, 1, 100, '12000', '2024-04-08', '2024-04-07 14:55:40', '2024-04-07 14:55:40'),
 (7, 1, 4, 21, '11000', '2024-04-05', '2024-04-07 14:55:40', '2024-04-07 14:55:40'),
-(8, 1, 1, 65, '12000', '2024-04-08', '2024-04-07 15:10:46', '2024-04-07 15:10:46');
+(8, 1, 1, 65, '12000', '2024-04-08', '2024-04-07 15:10:46', '2024-04-07 15:10:46'),
+(9, 3, 3, 50, '100000', '2024-04-15', '2024-04-15 09:22:06', '2024-04-15 09:22:06');
 
 -- --------------------------------------------------------
 
@@ -668,6 +694,14 @@ ALTER TABLE `products`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `product_histories`
+--
+ALTER TABLE `product_histories`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `created_by` (`created_by`);
+
+--
 -- Indexes for table `product_selling_prices`
 --
 ALTER TABLE `product_selling_prices`
@@ -775,19 +809,25 @@ ALTER TABLE `pos`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `product_histories`
+--
+ALTER TABLE `product_histories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `product_selling_prices`
 --
 ALTER TABLE `product_selling_prices`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `product_suppliers`
 --
 ALTER TABLE `product_suppliers`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `salaries`
@@ -810,6 +850,13 @@ ALTER TABLE `users`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `product_histories`
+--
+ALTER TABLE `product_histories`
+  ADD CONSTRAINT `product_histories_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `product_histories_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `product_selling_prices`

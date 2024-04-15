@@ -223,15 +223,43 @@ $(document).ready(function () {
                 text: result.category.category_name
             }
         });
-        // Object.entries(result.supplier).forEach((entry) => {
-        //     let [key, value] = entry;
-        //     $("#operatorId").select2("trigger", "select", {
-        //         data: {
-        //             id: value.id,
-        //             text: value.nama
-        //         }
-        //     })
-        // });
+        Object.entries(result.supplier).forEach((entry) => {
+            let [key, value] = entry;
+            if (key != 0) {
+                var i = parseInt(key) + 1;
+            }
+            let el = key == 0 ? "#supplierField" : "#supplierFieldMore" + i;
+            $(el).select2("trigger", "select", {
+                data: {
+                    id: value.supplier_id,
+                    text: value.supplier_name
+                }
+            })
+        });
+    }
+    function collapseChangeImage(data) {
+        $('#imgEdit').on('click','.btnChangeImg',function (e) {
+            e.preventDefault();
+            $('#imgEdit').html(`<div class="form-group col-md-12">
+            <label for="imageField" class="col-form-label mb-2">Image: <span class="text-danger">*</span></label>
+            <input type="file" name="image" id="imageField" onchange="onFileSelected(event)" class="form-control form-control-sm" required>
+            <span id="err_image"></span>
+        </div>
+        <div id="image_preview">
+        <img src="`+window.location.origin +'/storage/product/img/'+data.image+`" width="200" class="img-thumbnail rounded">
+        <br>
+        <a href="javascript:void(0)" class="text-gradient text-primary btnCancelChangeImg" title="Cancel Change"><i class="fas fa-times"></i> Cancel Change</a>
+        </div>`).change();
+        });
+        $('#imgEdit').on('click','.btnCancelChangeImg',function (e) {
+            e.preventDefault();
+            $('#imgEdit').html(`<div class="form-group col-md-12">
+            <label for="imageField" class="col-form-label mb-2">Image: <span class="text-danger">*</span></label>
+            <br>
+            <img src="`+window.location.origin + '/storage/product/img/' + data.image+`" width="200" class="img-thumbnail rounded">
+        </div>
+        <a href="javascript:void(0)" class="text-gradient text-primary btnChangeImg" title="Change Image"><i class="fas fa-pen"></i> Change Image</a>`).change();
+        });
     }
     async function ajaxModalProduct(el, type, id, name) {
         await $.ajax({
@@ -243,8 +271,10 @@ $(document).ready(function () {
             },
             success: function (result) {
                 el.find('#titleModalProduct').html(result.title);
-                el.find(':submit').data('el', '#' + result.idForm);
-                el.find(':submit').attr('form', result.idForm);
+                if (type != 'history') {
+                    el.find(':submit').data('el', '#' + result.idForm);
+                    el.find(':submit').attr('form', result.idForm);
+                }
                 el.find('#mainContent').html(result.html);
                 let valid = jqueryValidation_("#fm_" + type + "Product", {
                     category_name: {
@@ -320,7 +350,8 @@ $(document).ready(function () {
                             }
 
                         });
-                    })
+                    });
+                    collapseChangeImage(result.product);
                 } else if (type == 'add') {
                     airDatepicker('#buying_dateField');
                 }

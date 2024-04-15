@@ -11,7 +11,7 @@ use App\Models\ProductSupplier;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
 use App\Models\ProductSellingPrice;
-use App\Models\{Product, Category};
+use App\Models\{Product, Category, User};
 use App\Http\Controllers\Controller;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
@@ -74,7 +74,9 @@ class ProductController extends Controller
                             data-bs-target="#mdProduct" data-type="addStock" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-plus me-2"></i> Add Stock</a></li>
                     <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
                             data-bs-target="#mdProduct" data-type="edit" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-edit me-2"></i> Edit</a></li>
-                    <li><a class="dropdown-item border-radius-md" href="javascript:;"><i class="fa fa-history me-2"></i> History</a></li>
+                    <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
+                    data-bs-target="#mdProduct" data-type="history" data-id="' . $data->id . '" data-name="' . $data->product_name . '">
+                    <i class="fa fa-history me-2"></i> History</a></li>
                     <li><a class="dropdown-item border-radius-md text-danger" href="javascript:;"><i
                                 class="fa fa-trash me-2"></i> Delete</a></li>
                 </ul>
@@ -164,6 +166,12 @@ class ProductController extends Controller
                 $product_selling->selling_price = $sellingPrice[$k];
                 $product_selling->save();
             }
+            DB::table('product_histories')->insert([
+                'product_id' => $product_id,
+                'type_history' => 'create',
+                'content' => json_encode(['text' => 'Product (' . $request->product_name . ') dibuat.']),
+                'created_by' => auth()->user()->id
+            ]);
             DB::commit();
             return response()->json([
                 'status' => 'success',
@@ -352,6 +360,9 @@ class ProductController extends Controller
                 case 'add':
                     return self::showModalCreate();
                     break;
+                case 'history':
+                    return self::showModalHistory($request);
+                    break;
                 case 'addStock':
                     return self::showModalAddStock($request);
                     break;
@@ -494,7 +505,7 @@ class ProductController extends Controller
                 'b.name as supplier_name',
             )->get();
         $sellingPrice = ProductSellingPrice::where('product_id', $id)->get();
-        $data = DB::table('product_suppliers as a')
+        $dataSup = DB::table('product_suppliers as a')
             ->join('suppliers as b', 'a.supplier_id', '=', 'b.id')
             ->where('a.product_id', $id)->orderBy('a.id', 'ASC')
             ->select(
@@ -510,6 +521,7 @@ class ProductController extends Controller
         $html .= '<div class="row">
                 <div class="form-group col-md-12">
                     <label for="categoryField" class="col-form-label">Category Name: <span class="text-danger">*</span></label>
+                    <input type="hidden" name="id" value="' . $id . '">
                     <select name="category_id" id="categoryField" class="form-control select-category" required>
                         <option label="Choose One"></option>
                     </select>
@@ -517,7 +529,7 @@ class ProductController extends Controller
                 </div>
             </div>
             <div class="row input_fields_wrap">';
-            foreach ($data as $key => $value) {
+            foreach ($dataSup as $key => $value) {
                 if ($key == 0) {
                     $html .= '<div class="form-group col-md-3" data-sort="1">
                     <div class="d-flex justify-content-between">
@@ -539,7 +551,8 @@ class ProductController extends Controller
                 <div class="form-group col-md-3">
                     <label for="buying_dateField1" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
                     <input type="text" name="buying_date[]" id="buying_dateField1" class="form-control form-control-sm buying_date_cls" value="'.Carbon::parse($value->buying_date)->format('d/m/Y').'" placeholder="Pick buying date" readonly required>
-                </div>';
+                </div>
+                <input type="hidden" name="id_product_supplier[]" value="'.$value->id.'">';
                 } else {
                     $i = $key + 1;
                     $html .= '<div class="row field-more">
@@ -562,7 +575,8 @@ class ProductController extends Controller
                             </div>
                         </div>
                     </div>
-                    </div>';
+                    </div>
+                    <input type="hidden" name="id_product_supplier[]" value="'.$value->id.'">';
                 }
             }
             $html .='</div>
@@ -598,12 +612,13 @@ class ProductController extends Controller
                         <label for="selling_price_typeField" class="col-form-label mb-2">Selling Price Type: <span class="text-danger">*</span></label>
                         <button type="button" class="btn btn-primary btn-sm rounded btnAddSellingPrice" title="Add Selling Price"><i class="fas fa-plus"></i></button>
                     </div>
-                    <input type="text" name="selling_price_type[]" id="selling_price_typeField" class="form-control form-control-sm" placeholder="Enter Selling Price Type" required>
+                    <input type="text" name="selling_price_type[]" id="selling_price_typeField" class="form-control form-control-sm" value="' . $value->type . '" placeholder="Enter Selling Price Type" required>
                 </div>
                 <div class="form-group col-md-6">
                     <label for="selling_priceField" class="col-form-label mb-2">Selling Price: <span class="text-danger">*</span></label>
-                    <input type="number" name="selling_price[]" id="selling_priceField" min="1" class="form-control form-control-sm" placeholder="Enter Selling Price" required>
-                </div>';
+                    <input type="number" name="selling_price[]" id="selling_priceField" min="1" class="form-control form-control-sm" value="' . $value->selling_price . '" placeholder="Enter Selling Price" required>
+                </div>
+                <input type="hidden" name="id_selling_price[]" value="'.$value->id.'">';
                 } else {
                     $i = $key + 1;
                     $html .='<div class="row field-more-selling">
@@ -618,28 +633,73 @@ class ProductController extends Controller
                                 </div>
                             </div>
                         </div>
-                    </div>';
+                    </div>
+                    <input type="hidden" name="id_selling_price[]" value="'.$value->id.'">';
                 }
 
             }
 
             $html .='</div>
             <div class="row">
+                <div id="imgEdit">
                 <div class="form-group col-md-12">
                     <label for="imageField" class="col-form-label mb-2">Image: <span class="text-danger">*</span></label>
-                    <input type="file" name="image" id="imageField" onchange="onFileSelected(event)" class="form-control form-control-sm" required>
-                    <span id="err_image"></span>
+                    <br>
+                    <img src="'.asset('storage/product/img/' . $product->image).'" width="200" class="img-thumbnail rounded">
                 </div>
-                <div id="image_preview"></div>
+                <a href="javascript:void(0)" class="text-gradient text-primary btnChangeImg" title="Change Image"><i class="fas fa-pen"></i> Change Image</a>
+                </div>
             </div>
             </form>';
         return [
             'title' => $title,
             'html' => $html,
             'idForm' => $idForm,
+            'product' => $product,
             'category' => $category,
             'supplier' => $supplier,
-            'dataSup' => $data
+            'dataSup' => $dataSup
+        ];
+    }
+    protected function showModalHistory($request)
+    {
+        $product_id = $request->id;
+        $data = DB::table('product_histories')->where('product_id', $product_id)->orderBy('id', 'ASC')->paginate(10);
+        $title = '<i class="fa fa-history me-2"></i> History (' . $request->name . ')';
+        $html = '';
+        $html = '<div class="row">
+        <div class="col-md-12">
+        <div class="timeline timeline-one-side">';
+        foreach ($data as $key => $value) {
+            switch ($value->type_history) {
+                case 'create':
+                    $html .='<div class="timeline-block">
+                    <span class="timeline-step">
+                        <i class="ni ni-money-coins text-dark text-gradient"></i>
+                    </span>
+                    <div class="timeline-content">
+                        <h6 class="text-dark text-sm font-weight-bold mb-0">'.json_decode($value->content)->text.'</h6>
+                        <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">'.Carbon::parse($value->created_at)->diffForHumans().'</p>
+                        <span class="text-xs font-weight-bold mb-0">Dibuat oleh: <span class="text-dark text-xs font-weight-bold mb-0">'.User::find($value->created_by)->name.'</span></span>
+                    </div>
+                </div>';
+                    break;
+                case 'update':
+
+                    break;
+                case 'add_stock':
+
+                    break;
+                default:
+                    break;
+            }
+        }
+        $html .= '</div>
+        </div>
+        </div>';
+        return [
+            'title' => $title,
+            'html' => $html,
         ];
     }
     protected function showModalAddStock($request)
