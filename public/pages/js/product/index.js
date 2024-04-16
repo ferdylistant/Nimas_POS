@@ -261,6 +261,33 @@ $(document).ready(function () {
         <a href="javascript:void(0)" class="text-gradient text-primary btnChangeImg" title="Change Image"><i class="fas fa-pen"></i> Change Image</a>`).change();
         });
     }
+    async function ajaxClickLoadMoreHistory(id) {
+        await $('#loadMore').click(function (e) {
+            e.preventDefault();
+            var page = $(this).data("page");
+            $(this).data("page", page + 1);
+            $.ajax({
+                type: "GET",
+                url: baseUrl + "/products/history/ajax-modal",
+                data: {
+                    id: id,
+                    page: page
+                },
+                success: function (result) {
+                    if (result.htmlSub.length == 0) {
+                        $("#loadMore").attr("disabled", true).css("cursor", "not-allowed").change();
+                        notifToast("error", "Tidak ada data lagi");
+                    } else {
+                        $(".timeline").append(result.htmlSub);
+                        $('.timeline').animate({scrollTop: $('.timeline').prop("scrollHeight")}, 800);
+                    }
+                },
+                error: function (err) {
+                    notifToast("error", err.responseJSON.message);
+                }
+            })
+        })
+    }
     async function ajaxModalProduct(el, type, id, name) {
         await $.ajax({
             type: "GET",
@@ -352,8 +379,13 @@ $(document).ready(function () {
                         });
                     });
                     collapseChangeImage(result.product);
-                } else if (type == 'add') {
+                } else if (type == 'add' || type == 'addStock') {
                     airDatepicker('#buying_dateField');
+                } else {
+                    $('[data-bs-toggle="tooltip"]').tooltip({
+                        trigger: 'hover'
+                    });
+                    ajaxClickLoadMoreHistory(id);
                 }
             },
             error: function (err) {
@@ -434,6 +466,7 @@ $(document).ready(function () {
             var type = $(e.relatedTarget).data('type');
             var id = $(e.relatedTarget).data('id');
             var name = $(e.relatedTarget).data('name');
+            location.hash = $(e.relatedTarget).attr('href');
             var el = $(this);
             $('#mainContent').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
             ajaxModalProduct(el, type, id, name);

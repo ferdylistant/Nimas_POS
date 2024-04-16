@@ -19,8 +19,6 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
-
-    //-----------------index------------------------------------------
     public function index(Request $request)
     {
         if ($request->ajax()) {
@@ -70,9 +68,9 @@ class ProductController extends Controller
                 <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5" style="z-index: 999!important;"
                     aria-labelledby="dropdownTable" >
                     <li><a class="dropdown-item border-radius-md" href="' . url('products/detail/' . $data->id) . '"><i class="fa fa-eye me-2"></i> Detail </a></li>
-                    <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
+                    <li><a class="dropdown-item border-radius-md" href="?modal=addStock" data-bs-toggle="modal"
                             data-bs-target="#mdProduct" data-type="addStock" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-plus me-2"></i> Add Stock</a></li>
-                    <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
+                    <li><a class="dropdown-item border-radius-md" href="?modal=edit" data-bs-toggle="modal"
                             data-bs-target="#mdProduct" data-type="edit" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-edit me-2"></i> Edit</a></li>
                     <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
                     data-bs-target="#mdProduct" data-type="history" data-id="' . $data->id . '" data-name="' . $data->product_name . '">
@@ -98,8 +96,6 @@ class ProductController extends Controller
         </nav>'
         ]);
     }
-
-    //------------------Insert/Store------------------------------------
     public function store(Request $request)
     {
         try {
@@ -169,7 +165,7 @@ class ProductController extends Controller
             DB::table('product_histories')->insert([
                 'product_id' => $product_id,
                 'type_history' => 'create',
-                'content' => json_encode(['text' => 'Product (' . $request->product_name . ') dibuat.']),
+                'content' => json_encode(['text' => 'Produk (' . $request->product_name . ') dibuat.']),
                 'created_by' => auth()->user()->id
             ]);
             DB::commit();
@@ -186,8 +182,6 @@ class ProductController extends Controller
             ]);
         }
     }
-
-    //----------------------------Show(id)-------------------------------------------
     public function show($id)
     {
         if (request()->ajax()) {
@@ -231,8 +225,6 @@ class ProductController extends Controller
         </nav>'
         ]);
     }
-
-    //---------------------------Edit/Update----------------------------------------
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
@@ -281,8 +273,6 @@ class ProductController extends Controller
             DB::table('products')->where('id', $id)->update($data);
         }
     }
-
-    //---------------------------Delete--------------------------------------------
     public function destroy($id)
     {
         $product = DB::table('products')->where('id', $id)->first();
@@ -664,42 +654,72 @@ class ProductController extends Controller
     protected function showModalHistory($request)
     {
         $product_id = $request->id;
-        $data = DB::table('product_histories')->where('product_id', $product_id)->orderBy('id', 'ASC')->paginate(10);
+        $data = DB::table('product_histories')->where('product_id', $product_id)->orderBy('id', 'ASC')->paginate(2);
         $title = '<i class="fa fa-history me-2"></i> History (' . $request->name . ')';
         $html = '';
-        $html = '<div class="row">
-        <div class="col-md-12">
-        <div class="timeline timeline-one-side">';
-        foreach ($data as $key => $value) {
-            switch ($value->type_history) {
-                case 'create':
-                    $html .='<div class="timeline-block">
-                    <span class="timeline-step">
-                        <i class="ni ni-money-coins text-dark text-gradient"></i>
-                    </span>
-                    <div class="timeline-content">
-                        <h6 class="text-dark text-sm font-weight-bold mb-0">'.json_decode($value->content)->text.'</h6>
-                        <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">'.Carbon::parse($value->created_at)->diffForHumans().'</p>
-                        <span class="text-xs font-weight-bold mb-0">Dibuat oleh: <span class="text-dark text-xs font-weight-bold mb-0">'.User::find($value->created_by)->name.'</span></span>
-                    </div>
-                </div>';
-                    break;
-                case 'update':
+        $htmlSub = '';
+        if (!$data->isEmpty()) {
+            $html = '<div class="row">
+            <div class="col-md-12">
+            <div class="timeline timeline-one-side">';
+            foreach ($data as $key => $value) {
+                switch ($value->type_history) {
+                    case 'create':
+                        $htmlSub .='<div class="timeline-block">
+                        <span class="timeline-step">
+                            <i class="ni ni-money-coins text-dark text-gradient"></i>
+                        </span>
+                        <div class="timeline-content">
+                            <h6 class="text-dark text-sm font-weight-bold mb-0">'.json_decode($value->content)->text.'</h6>
+                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">'.Carbon::parse($value->created_at)->diffForHumans().'</p>
+                            <span class="text-xs font-weight-bold mb-0">Dibuat oleh: <span class="text-dark text-xs font-weight-bold mb-0">'.User::find($value->created_by)->name.'</span></span>
+                        </div>
+                        </div>';
+                        break;
+                    case 'update':
 
-                    break;
-                case 'add_stock':
-
-                    break;
-                default:
-                    break;
+                        break;
+                    case 'add_stock':
+                        $htmlSub .='<div class="timeline-block">
+                        <span class="timeline-step">
+                            <i class="ni ni-basket text-success text-gradient"></i>
+                        </span>
+                        <div class="timeline-content">
+                            <h6 class="text-dark text-sm font-weight-bold mb-0">'.json_decode($value->content)->text.' <a href="'.url('products/detail/'.$value->product_id).'" class="text-primary text-xs font-weight-bold">Lihat detail</a></h6>
+                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">'.Carbon::parse($value->created_at)->diffForHumans().'</p>
+                            <span class="text-xs font-weight-bold mb-0">Ditambahkan oleh: <span class="text-dark text-xs font-weight-bold mb-0">'.User::find($value->created_by)->name.'</span></span>
+                        </div>
+                        </div>';
+                        break;
+                    default:
+                        break;
+                }
             }
+            $html .= $htmlSub;
+            $html .= '</div>
+            <center class="fixed-bottom bottom-0 position-sticky w-100">
+            <div class="text-center mt-5 shadow bg-white d-flex justify-content-center" style="width: 40px; height: 40px;border-radius: 50%;align-items: center;
+            text-align: center;">
+                <a id="loadMore" class="text-dark position-sticky px-3 py-2 text-xs" href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Load More" title="Load More" data-page="2">
+                    <i class="ni ni-bold-down py-2"> </i>
+                </a>
+
+            </div>
+            </center>
+            </div>
+            </div>';
+        } else {
+            $html = '<div class="row">
+            <div class="col-md-12 text-center">
+            <img src="'.asset('assets/img/illustrations/rocket-dark.png').'" width="200" class="rounded">
+            <h6 class="text-dark text-sm font-weight-bold mb-0">Tidak ada riwayat</h6>
+            </div>
+            </div>';
         }
-        $html .= '</div>
-        </div>
-        </div>';
         return [
             'title' => $title,
             'html' => $html,
+            'htmlSub' => $htmlSub,
         ];
     }
     protected function showModalAddStock($request)
@@ -754,6 +774,7 @@ class ProductController extends Controller
         $html .= '<form id="fm_addStockProduct">
         <input type="hidden" name="product_id" value="' . $id . '">
         <input type="hidden" name="product_name" value="' . $prod->product_name . '">
+        <input type="hidden" name="unit_satuan" value="' . $prod->unit_satuan . '">
         <div class="row input_fields_wrap">
         <div class="form-group col-md-3">
             <div class="d-flex justify-content-between">
@@ -822,6 +843,14 @@ class ProductController extends Controller
                 $product_supplier->save();
             }
             DB::table('products')->where('id', $request->product_id)->increment('total_stock', array_sum($productQuantity));
+            DB::table('product_histories')->insert([
+                'product_id' => $request->product_id,
+                'type_history' => 'add_stock',
+                'content' => json_encode([
+                    'text' => 'Jumlah stok (' . $request->product_name . ') ditambahkan sebesar ' . array_sum($productQuantity).''.$request->unit_satuan.'.',
+                ]),
+                'created_by' => auth()->user()->id,
+            ]);
             DB::commit();
             return response()->json([
                 'status' => 'success',

@@ -29,7 +29,7 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5"
                                     aria-labelledby="dropdownTable">
-                                    <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
+                                    <li><a class="dropdown-item border-radius-md" href="?modal=add" data-bs-toggle="modal"
                                             data-bs-target="#mdProduct" data-type="add" data-id="" data-name=""><i
                                                 class="fa fa-plus me-2"></i>
                                             Create</a></li>
