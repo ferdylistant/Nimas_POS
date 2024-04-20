@@ -31,7 +31,13 @@ Route::middleware(['auth'])->group(function () use ($path) {
         Route::post('/store', $path . '\Api\ProductController@store');
         Route::get('/detail/{id}', $path . '\Api\ProductController@show');
         Route::post('/update', $path . '\Api\ProductController@update');
-        Route::post('/delete', $path . '\Api\ProductController@delete');
+        Route::delete('/delete/{id}', $path . '\Api\ProductController@destroy');
         Route::get('/select2/{type}', $path . '\Api\ProductController@select2');
+    });
+    Route::prefix('suppliers')->group(function () use ($path) {
+        Route::get('/', $path . '\Api\SupplierController@index')->name('supplier.index');
+        Route::match(['get', 'post'], '/{type}/ajax-modal', $path . '\Api\SupplierController@ajaxModal');
+        Route::post('/store', $path . '\Api\SupplierController@store');
+        Route::post('/update', $path . '\Api\SupplierController@update');
     });
 });

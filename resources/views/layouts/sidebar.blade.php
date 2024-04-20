@@ -288,12 +288,12 @@
                 @endswitch
                 <div class="collapse {{ $show }}" id="peopleNav">
                     <div class="pt-1 ps-3">
-                        <a class="nav-link {{ Request::segment(2) == 'supplier' ? 'active' : '' }}"
-                            href="{{ route('category.index') }}">
+                        <a class="nav-link {{ Request::segment(1) == 'suppliers' ? 'active' : '' }}"
+                            href="{{ route('supplier.index') }}">
                             <div
                                 class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex justify-content-center">
                                 <i
-                                    class="fas fa-circle {{ Request::segment(2) == 'supplier' ? '' : 'text-dark' }}"></i>
+                                    class="fas fa-circle {{ Request::segment(1) == 'suppliers' ? '' : 'text-dark' }}"></i>
                             </div>
                             <span class="nav-link-text ms-1">Suppliers</span>
                         </a>

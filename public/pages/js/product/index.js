@@ -288,7 +288,7 @@ $(document).ready(function () {
             })
         })
     }
-    async function ajaxModalProduct(el, type, id, name) {
+    async function ajaxModalProduct(el, type, id='', name='') {
         await $.ajax({
             type: "GET",
             url: baseUrl + "/products/" + type + "/ajax-modal",
@@ -444,7 +444,7 @@ $(document).ready(function () {
     async function ajaxEditProduct(el) {
         await $.ajax({
             type: "POST",
-            url: baseUrl + "/category/update",
+            url: baseUrl + "/products/update",
             data: new FormData($(el).get(0)),
             processData: false,
             contentType: false,
@@ -452,8 +452,8 @@ $(document).ready(function () {
             success: function (result) {
                 notifToast(result.status, result.message);
                 if (result.status == "success") {
-                    tbProduct.ajax.reload();
                     $('#mdProduct').modal('hide');
+                    tbProduct.ajax.reload();
                 }
             },
             error: function (err) {
@@ -461,12 +461,61 @@ $(document).ready(function () {
             }
         });
     }
+    async function ajaxDeleteProduct(id) {
+        await $.ajax({
+            type: "DELETE",
+            url: baseUrl + "/products/delete/"+id,
+            success: function (result) {
+                notifToast(result.status, result.message);
+                if (result.status == "success") {
+                    tbProduct.ajax.reload();
+                }
+            },
+            error: function (err) {
+                notifToast("error", err.responseJSON.message);
+            }
+        })
+    }
+    $('#tb_Product').on('click', '.btnDeleteProduct', function (e) {
+        e.preventDefault();
+        var id = $(this).data('id');
+        var name = $(this).data('name');
+        $.confirm({
+            theme: 'modern',
+            icon: 'fa fa-question',
+            title: 'Delete Product',
+            content: 'Are you sure you want to delete (' + name + ')?',
+            type: 'red',
+            columnClass: 'col-md-6 col-md-offset-3',
+            animationBounce: 2.5,
+            buttons: {
+                confirm: {
+                    text: 'Sure!',
+                    btnClass: 'btn-red',
+                    action: function () {
+                        ajaxDeleteProduct(id);
+                    }
+                },
+                cancel: function () {
+                    // $.alert('Canceled!');
+                }
+            }
+        });
+    });
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    if (urlParams.has('modal')) {
+        $('#mdProduct').modal('show');
+        ajaxModalProduct($('#mdProduct'), urlParams.get('modal'), urlParams.get('id'), urlParams.get('name'));
+    }
     $('#mdProduct').on({
         'show.bs.modal': function (e) {
-            var type = $(e.relatedTarget).data('type');
-            var id = $(e.relatedTarget).data('id');
-            var name = $(e.relatedTarget).data('name');
-            location.hash = $(e.relatedTarget).attr('href');
+            window.history.pushState({}, '', $(e.relatedTarget).attr('href'));
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            var type = urlParams.get('modal');
+            var id = urlParams.get('id');
+            var name = urlParams.get('name');
             var el = $(this);
             $('#mainContent').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
             ajaxModalProduct(el, type, id, name);
@@ -476,6 +525,9 @@ $(document).ready(function () {
             $(this).find('#titleModalProduct').html('');
             $(this).find(':submit').data('el', '');
             $(this).find(':submit').attr('form', '');
+        },
+        'hide.bs.modal': function () {
+            window.history.pushState({}, '', '/products');
         },
         'submit': function (e) {
             e.preventDefault();

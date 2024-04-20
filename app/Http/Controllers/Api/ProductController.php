@@ -68,14 +68,14 @@ class ProductController extends Controller
                 <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5" style="z-index: 999!important;"
                     aria-labelledby="dropdownTable" >
                     <li><a class="dropdown-item border-radius-md" href="' . url('products/detail/' . $data->id) . '"><i class="fa fa-eye me-2"></i> Detail </a></li>
-                    <li><a class="dropdown-item border-radius-md" href="?modal=addStock" data-bs-toggle="modal"
-                            data-bs-target="#mdProduct" data-type="addStock" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-plus me-2"></i> Add Stock</a></li>
-                    <li><a class="dropdown-item border-radius-md" href="?modal=edit" data-bs-toggle="modal"
-                            data-bs-target="#mdProduct" data-type="edit" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i class="fa fa-edit me-2"></i> Edit</a></li>
-                    <li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
-                    data-bs-target="#mdProduct" data-type="history" data-id="' . $data->id . '" data-name="' . $data->product_name . '">
+                    <li><a class="dropdown-item border-radius-md" href="?modal=addStock&id=' . $data->id . '&name=' . $data->product_name . '" data-bs-toggle="modal"
+                            data-bs-target="#mdProduct"><i class="fa fa-plus me-2"></i> Add Stock</a></li>
+                    <li><a class="dropdown-item border-radius-md" href="?modal=edit&id=' . $data->id . '&name=' . $data->product_name . '" data-bs-toggle="modal"
+                            data-bs-target="#mdProduct"><i class="fa fa-edit me-2"></i> Edit</a></li>
+                    <li><a class="dropdown-item border-radius-md" href="?modal=history&id=' . $data->id . '&name=' . $data->product_name . '" data-bs-toggle="modal"
+                    data-bs-target="#mdProduct">
                     <i class="fa fa-history me-2"></i> History</a></li>
-                    <li><a class="dropdown-item border-radius-md text-danger" href="javascript:;"><i
+                    <li><a class="dropdown-item border-radius-md text-danger btnDeleteProduct" href="javascript:;" data-id="' . $data->id . '" data-name="' . $data->product_name . '"><i
                                 class="fa fa-trash me-2"></i> Delete</a></li>
                 </ul>
             </div>';
@@ -225,63 +225,123 @@ class ProductController extends Controller
         </nav>'
         ]);
     }
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $validatedData = $request->validate([
-            'product_name' => 'required|max:255',
-            'product_code' => 'required|max:255',
-            'category_id' => 'required',
-            'supplier_id' => 'required',
-            'buying_price' => 'required',
-            'root' => 'required',
-            'selling_price' => 'required',
-            'product_quantity' => 'required',
-        ]);
+        try {
+            $id = $request->id;
+            // dd($id);
+            $validators = Validator::make($request->all(), [
+                'unit_satuan' => 'required|max:6',
+                'product_name' => 'required|max:255',
+                'category_id' => 'required',
+                'supplier_id.*' => 'required',
+                'buying_price.*' => 'required',
+                'selling_price.*' => 'required',
+                'buying_date.*' => 'required',
+                'product_quantity.*' => 'required',
+                'image' => 'mimes:jpg,jpeg,png|max:5048',
+            ]);
 
-        $data = array();
-        $data['product_name'] = $request->product_name;
-        $data['product_code'] = $request->product_code;
-        $data['category_id'] = $request->category_id;
-        $data['supplier_id'] = $request->supplier_id;
-        $data['root'] = $request->root;
-        $data['buying_price'] = $request->buying_price;
-        $data['selling_price'] = $request->selling_price;
-        $data['buying_date'] = $request->buying_date;
-        $data['product_quantity'] = $request->product_quantity;
-        $image = $request->newphoto;
-        if ($image) {
-            $position = strpos($image, ';');
-            $sub = substr($image, 0, $position);
-            $ext = explode('/', $sub)[1];
-            $name = time() . "." . $ext;
-            $img = Image::make($image)->resize(240, 200);
-            $upload_path = 'backend/product/';
-            $image_url = $upload_path . $name;
-            $success = $img->save($image_url);
-            if ($success) {
-                $data['image'] = $image_url;
-                $img = DB::table('products')->where('id', $id)->first();
-                $image_path = $img->image;
-                if ($image_path) {
-                    $done = unlink($image_path);
-                }
-                $user = DB::table('products')->where('id', $id)->update($data);
+            if ($validators->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $validators->errors()
+                ]);
             }
-        } else {
-            $oldlogo = $request->image;
-            $data['image'] = $oldlogo;
-            DB::table('products')->where('id', $id)->update($data);
+            $imgProduct = DB::table('products')->where('id',$id)->first()->image;
+            //Table Supplier
+            $idProductSupplier = $request->id_product_supplier;
+            $supplierId = $request->supplier_id;
+            $buyingPrice = $request->buying_price;
+            $productQuantity = $request->product_quantity;
+            $buyingDate = $request->buying_date;
+            //Table Selling Price
+            $id_selling_price = $request->id_selling_price;
+            $sellingPriceType = $request->selling_price_type;
+            $sellingPrice = $request->selling_price;
+            $unique = array_unique($supplierId);
+            if (count($unique) < count($supplierId)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Supplier tidak boleh sama'
+                ]);
+            }
+            if ($request->has('image')) {
+                if ($imgProduct) {
+                    Storage::delete('prodcut/img/' . $imgProduct);
+                }
+                $imgProduct = explode('/', $request->file('image')->store('product/img/'));
+                $imgProduct = end($imgProduct);
+            }
+            DB::beginTransaction();
+            DB::table('products')->where('id',$id)->update([
+                'product_name' => $request->product_name,
+                'product_code' => $request->product_code,
+                'category_id' => $request->category_id,
+                'image' => $imgProduct,
+                'unit_satuan' => $request->unit_satuan,
+                'total_stock' => array_sum($productQuantity),
+            ]);
+            DB::table('product_suppliers')->where('product_id', $id)->delete();
+            DB::table('product_selling_prices')->where('product_id', $id)->delete();
+            for ($i = 0; $i < count($supplierId); $i++) {
+                $product_supplier = new ProductSupplier;
+                $product_supplier->product_id = $id;
+                $product_supplier->supplier_id = $supplierId[$i];
+                $product_supplier->buying_price = $buyingPrice[$i];
+                $product_supplier->product_qty = $productQuantity[$i];
+                $product_supplier->buying_date = Carbon::createFromFormat('d/m/Y', $buyingDate[$i])->format('Y-m-d');
+                $product_supplier->save();
+            }
+            for ($k = 0; $k < count($sellingPriceType); $k++) {
+                $product_selling = new ProductSellingPrice;
+                $product_selling->product_id = $id;
+                $product_selling->type = $sellingPriceType[$k];
+                $product_selling->selling_price = $sellingPrice[$k];
+                $product_selling->save();
+            }
+            // $history = [
+
+            // ];
+            DB::table('product_histories')->insert([
+                'product_id' => $id,
+                'type_history' => 'update',
+                'content' => json_encode(['text' => 'Produk (' . $request->product_name . ') diubah.']),
+                'created_by' => auth()->user()->id
+            ]);
+            DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Product updated successfully',
+            ]);
+        } catch (\Exception $e) {
+            Storage::delete('product/img/' . $imgProduct);
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
         }
     }
     public function destroy($id)
     {
-        $product = DB::table('products')->where('id', $id)->first();
-        $image = $product->image;
-        if ($image) {
-            unlink($image);
+        try {
+            $product = DB::table('products')->where('id', $id)->first();
+            $image = $product->image;
+            Storage::delete('prodcut/img/' .  $image);
+            DB::beginTransaction();
             DB::table('products')->where('id', $id)->delete();
-        } else {
-            DB::table('products')->where('id', $id)->delete();
+            DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Product deleted successfully',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
         }
     }
     protected function getModalBarcode($id)
@@ -519,9 +579,9 @@ class ProductController extends Controller
                 </div>
             </div>
             <div class="row input_fields_wrap">';
-            foreach ($dataSup as $key => $value) {
-                if ($key == 0) {
-                    $html .= '<div class="form-group col-md-3" data-sort="1">
+        foreach ($dataSup as $key => $value) {
+            if ($key == 0) {
+                $html .= '<div class="form-group col-md-3" data-sort="1">
                     <div class="d-flex justify-content-between">
                         <label for="supplierField" class="col-form-label">Supplier Name: <span class="text-danger">*</span></label>
                         <button type="button" class="btn btn-primary btn-sm rounded btnAddSupplier" title="Add Supplier"><i class="fas fa-plus"></i></button>
@@ -532,44 +592,44 @@ class ProductController extends Controller
                 </div>
                 <div class="form-group col-md-3">
                     <label for="product_amountField" class="col-form-label mb-2">Amount: <span class="text-danger">*</span></label>
-                    <input type="number" name="product_quantity[]" id="product_amountField" min="1" class="form-control form-control-sm" value="'.$value->product_qty.'" placeholder="Enter Amount" required>
+                    <input type="number" name="product_quantity[]" id="product_amountField" min="1" class="form-control form-control-sm" value="' . $value->product_qty . '" placeholder="Enter Amount" required>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="buying_priceField" class="col-form-label mb-2">Buying Price: <span class="text-danger">*</span></label>
-                    <input type="number" name="buying_price[]" id="buying_priceField" min="1" class="form-control form-control-sm" value="'.$value->buying_price.'" placeholder="Enter Buying Price" required>
+                    <input type="number" name="buying_price[]" id="buying_priceField" min="1" class="form-control form-control-sm" value="' . $value->buying_price . '" placeholder="Enter Buying Price" required>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="buying_dateField1" class="col-form-label mb-2">Buying Date: <span class="text-danger">*</span></label>
-                    <input type="text" name="buying_date[]" id="buying_dateField1" class="form-control form-control-sm buying_date_cls" value="'.Carbon::parse($value->buying_date)->format('d/m/Y').'" placeholder="Pick buying date" readonly required>
+                    <input type="text" name="buying_date[]" id="buying_dateField1" class="form-control form-control-sm buying_date_cls" value="' . Carbon::parse($value->buying_date)->format('d/m/Y') . '" placeholder="Pick buying date" readonly required>
                 </div>
-                <input type="hidden" name="id_product_supplier[]" value="'.$value->id.'">';
-                } else {
-                    $i = $key + 1;
-                    $html .= '<div class="row field-more">
-                    <div class="form-group col-md-3" data-sort="'.$i.'">
-                        <select name="supplier_id[]" id="supplierFieldMore'.$i.'" class="form-control form-control-sm select-supplier" required>
+                <input type="hidden" name="id_product_supplier[]" value="' . $value->id . '">';
+            } else {
+                $i = $key + 1;
+                $html .= '<div class="row field-more">
+                    <div class="form-group col-md-3" data-sort="' . $i . '">
+                        <select name="supplier_id[]" id="supplierFieldMore' . $i . '" class="form-control form-control-sm select-supplier" required>
                             <option label="Choose One"></option>
                         </select>
                     </div>
                     <div class="form-group col-md-3">
-                        <input type="number" name="product_quantity[]" id="product_amountField'.$i.'" min="1" class="form-control form-control-sm" value="'.$value->product_qty.'" placeholder="Enter Amount" required>
+                        <input type="number" name="product_quantity[]" id="product_amountField' . $i . '" min="1" class="form-control form-control-sm" value="' . $value->product_qty . '" placeholder="Enter Amount" required>
                     </div>
                     <div class="form-group col-md-3">
-                        <input type="number" name="buying_price[]" id="buying_priceField'.$i.'" min="1" class="form-control form-control-sm" value="'.$value->buying_price.'" placeholder="Enter Buying Price" required>
+                        <input type="number" name="buying_price[]" id="buying_priceField' . $i . '" min="1" class="form-control form-control-sm" value="' . $value->buying_price . '" placeholder="Enter Buying Price" required>
                     </div>
                     <div class="form-group col-md-3">
                         <div class="input-group input-group-sm">
-                            <input type="text" name="buying_date[]" id="buying_dateField'.$i.'" class="form-control form-control-sm buying_date_cls" value="'.Carbon::parse($value->buying_date)->format('d/m/Y').'" placeholder="Pick buying date" readonly required>
+                            <input type="text" name="buying_date[]" id="buying_dateField' . $i . '" class="form-control form-control-sm buying_date_cls" value="' . Carbon::parse($value->buying_date)->format('d/m/Y') . '" placeholder="Pick buying date" readonly required>
                             <div class="input-group-append">
                                 <span class="input-group-text"><a href="javascript:void(0)" class="remove_field_supplier text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
                             </div>
                         </div>
                     </div>
                     </div>
-                    <input type="hidden" name="id_product_supplier[]" value="'.$value->id.'">';
-                }
+                    <input type="hidden" name="id_product_supplier[]" value="' . $value->id . '">';
             }
-            $html .='</div>
+        }
+        $html .= '</div>
             <div class="row">
                 <div class="form-group col-md-4">
                     <label for="unit_satuanField" class="col-form-label mb-2">Unit/Satuan: <span class="text-danger">*</span></label>
@@ -595,9 +655,9 @@ class ProductController extends Controller
                 </div>
             </div>
             <div class="row input_fields_wrap_selling">';
-            foreach ($sellingPrice as $key => $value) {
-                if ($key == 0) {
-                $html .='<div class="form-group col-md-6">
+        foreach ($sellingPrice as $key => $value) {
+            if ($key == 0) {
+                $html .= '<div class="form-group col-md-6">
                     <div class="d-flex justify-content-between">
                         <label for="selling_price_typeField" class="col-form-label mb-2">Selling Price Type: <span class="text-danger">*</span></label>
                         <button type="button" class="btn btn-primary btn-sm rounded btnAddSellingPrice" title="Add Selling Price"><i class="fas fa-plus"></i></button>
@@ -608,34 +668,33 @@ class ProductController extends Controller
                     <label for="selling_priceField" class="col-form-label mb-2">Selling Price: <span class="text-danger">*</span></label>
                     <input type="number" name="selling_price[]" id="selling_priceField" min="1" class="form-control form-control-sm" value="' . $value->selling_price . '" placeholder="Enter Selling Price" required>
                 </div>
-                <input type="hidden" name="id_selling_price[]" value="'.$value->id.'">';
-                } else {
-                    $i = $key + 1;
-                    $html .='<div class="row field-more-selling">
+                <input type="hidden" name="id_selling_price[]" value="' . $value->id . '">';
+            } else {
+                $i = $key + 1;
+                $html .= '<div class="row field-more-selling">
                         <div class="form-group col-md-6" data-sortselling="' . $i . '">
-                            <input type="text" name="selling_price_type[]" id="selling_price_typeField'.$i.'" class="form-control form-control-sm" value="' . $value->type . '" placeholder="Enter Selling Price Type" required>
+                            <input type="text" name="selling_price_type[]" id="selling_price_typeField' . $i . '" class="form-control form-control-sm" value="' . $value->type . '" placeholder="Enter Selling Price Type" required>
                         </div>
                         <div class="form-group col-md-6">
                             <div class="input-group input-group-sm">
-                                <input type="number" name="selling_price[]" id="selling_priceField'.$i.'" min="1" class="form-control form-control-sm" value="' . $value->selling_price . '" placeholder="Enter Selling Price" required>
+                                <input type="number" name="selling_price[]" id="selling_priceField' . $i . '" min="1" class="form-control form-control-sm" value="' . $value->selling_price . '" placeholder="Enter Selling Price" required>
                                 <div class="input-group-append">
                                     <span class="input-group-text"><a href="javascript:void(0)" class="remove_field_selling_price text-danger" title="Delete Field"><i class="fas fa-times"></i></a></span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <input type="hidden" name="id_selling_price[]" value="'.$value->id.'">';
-                }
-
+                    <input type="hidden" name="id_selling_price[]" value="' . $value->id . '">';
             }
+        }
 
-            $html .='</div>
+        $html .= '</div>
             <div class="row">
                 <div id="imgEdit">
                 <div class="form-group col-md-12">
                     <label for="imageField" class="col-form-label mb-2">Image: <span class="text-danger">*</span></label>
                     <br>
-                    <img src="'.asset('storage/product/img/' . $product->image).'" width="200" class="img-thumbnail rounded">
+                    <img src="' . asset('storage/product/img/' . $product->image) . '" width="200" class="img-thumbnail rounded">
                 </div>
                 <a href="javascript:void(0)" class="text-gradient text-primary btnChangeImg" title="Change Image"><i class="fas fa-pen"></i> Change Image</a>
                 </div>
@@ -665,14 +724,14 @@ class ProductController extends Controller
             foreach ($data as $key => $value) {
                 switch ($value->type_history) {
                     case 'create':
-                        $htmlSub .='<div class="timeline-block">
+                        $htmlSub .= '<div class="timeline-block">
                         <span class="timeline-step">
                             <i class="ni ni-money-coins text-dark text-gradient"></i>
                         </span>
                         <div class="timeline-content">
-                            <h6 class="text-dark text-sm font-weight-bold mb-0">'.json_decode($value->content)->text.'</h6>
-                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">'.Carbon::parse($value->created_at)->diffForHumans().'</p>
-                            <span class="text-xs font-weight-bold mb-0">Dibuat oleh: <span class="text-dark text-xs font-weight-bold mb-0">'.User::find($value->created_by)->name.'</span></span>
+                            <h6 class="text-dark text-sm font-weight-bold mb-0">' . json_decode($value->content)->text . '</h6>
+                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . '</p>
+                            <span class="text-xs font-weight-bold mb-0">Dibuat oleh: <span class="text-dark text-xs font-weight-bold mb-0">' . User::find($value->created_by)->name . '</span></span>
                         </div>
                         </div>';
                         break;
@@ -680,14 +739,14 @@ class ProductController extends Controller
 
                         break;
                     case 'add_stock':
-                        $htmlSub .='<div class="timeline-block">
+                        $htmlSub .= '<div class="timeline-block">
                         <span class="timeline-step">
                             <i class="ni ni-basket text-success text-gradient"></i>
                         </span>
                         <div class="timeline-content">
-                            <h6 class="text-dark text-sm font-weight-bold mb-0">'.json_decode($value->content)->text.' <a href="'.url('products/detail/'.$value->product_id).'" class="text-primary text-xs font-weight-bold">Lihat detail</a></h6>
-                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">'.Carbon::parse($value->created_at)->diffForHumans().'</p>
-                            <span class="text-xs font-weight-bold mb-0">Ditambahkan oleh: <span class="text-dark text-xs font-weight-bold mb-0">'.User::find($value->created_by)->name.'</span></span>
+                            <h6 class="text-dark text-sm font-weight-bold mb-0">' . json_decode($value->content)->text . ' <a href="' . url('products/detail/' . $value->product_id) . '" class="text-primary text-xs font-weight-bold">Lihat detail</a></h6>
+                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . '</p>
+                            <span class="text-xs font-weight-bold mb-0">Ditambahkan oleh: <span class="text-dark text-xs font-weight-bold mb-0">' . User::find($value->created_by)->name . '</span></span>
                         </div>
                         </div>';
                         break;
@@ -711,7 +770,7 @@ class ProductController extends Controller
         } else {
             $html = '<div class="row">
             <div class="col-md-12 text-center">
-            <img src="'.asset('assets/img/illustrations/rocket-dark.png').'" width="200" class="rounded">
+            <img src="' . asset('assets/img/illustrations/rocket-dark.png') . '" width="200" class="rounded">
             <h6 class="text-dark text-sm font-weight-bold mb-0">Tidak ada riwayat</h6>
             </div>
             </div>';
@@ -847,7 +906,7 @@ class ProductController extends Controller
                 'product_id' => $request->product_id,
                 'type_history' => 'add_stock',
                 'content' => json_encode([
-                    'text' => 'Jumlah stok (' . $request->product_name . ') ditambahkan sebesar ' . array_sum($productQuantity).''.$request->unit_satuan.'.',
+                    'text' => 'Jumlah stok (' . $request->product_name . ') ditambahkan sebesar ' . array_sum($productQuantity) . '' . $request->unit_satuan . '.',
                 ]),
                 'created_by' => auth()->user()->id,
             ]);
