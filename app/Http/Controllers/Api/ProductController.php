@@ -67,7 +67,7 @@ class ProductController extends Controller
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5" style="z-index: 999!important;"
                     aria-labelledby="dropdownTable" >
-                    <li><a class="dropdown-item border-radius-md" href="' . url('products/detail/' . $data->id) . '"><i class="fa fa-eye me-2"></i> Detail </a></li>
+                    <li><a class="dropdown-item border-radius-md" href="' . url('products/product-list/detail/' . $data->id) . '"><i class="fa fa-eye me-2"></i> Detail </a></li>
                     <li><a class="dropdown-item border-radius-md" href="?modal=addStock&id=' . $data->id . '&name=' . $data->product_name . '" data-bs-toggle="modal"
                             data-bs-target="#mdProduct"><i class="fa fa-plus me-2"></i> Add Stock</a></li>
                     <li><a class="dropdown-item border-radius-md" href="?modal=edit&id=' . $data->id . '&name=' . $data->product_name . '" data-bs-toggle="modal"
@@ -179,7 +179,7 @@ class ProductController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()
-            ]);
+            ],$e->getCode());
         }
     }
     public function show($id)
@@ -320,7 +320,7 @@ class ProductController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()
-            ]);
+            ],$e->getCode());
         }
     }
     public function destroy($id)
@@ -341,7 +341,7 @@ class ProductController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()
-            ]);
+            ],$e->getCode());
         }
     }
     protected function getModalBarcode($id)
@@ -363,7 +363,7 @@ class ProductController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()
-            ]);
+            ],$e->getCode());
         }
     }
     protected function getCollapseSupplier($supId, $prodId, $unitSatuan)
@@ -491,7 +491,7 @@ class ProductController extends Controller
             <div class="row">
                 <div class="form-group col-md-4">
                     <label for="unit_satuanField" class="col-form-label mb-2">Unit/Satuan: <span class="text-danger">*</span></label>
-                    <input type="text" name="unit_satuan" id="unit_satuanField" class="form-control form-control-sm" placeholder="Enter Product Name" required>
+                    <input type="text" name="unit_satuan" id="unit_satuanField" class="form-control form-control-sm" placeholder="Enter Unit/Satuan" required>
                     <span id="err_unit_satuan"></span>
                 </div>
                 <div class="form-group col-md-4">
@@ -633,7 +633,7 @@ class ProductController extends Controller
             <div class="row">
                 <div class="form-group col-md-4">
                     <label for="unit_satuanField" class="col-form-label mb-2">Unit/Satuan: <span class="text-danger">*</span></label>
-                    <input type="text" name="unit_satuan" id="unit_satuanField" class="form-control form-control-sm" value="' . $product->unit_satuan . '" placeholder="Enter Product Name" required>
+                    <input type="text" name="unit_satuan" id="unit_satuanField" class="form-control form-control-sm" value="' . $product->unit_satuan . '" placeholder="Enter Unit/Satuan" required>
                     <span id="err_unit_satuan"></span>
                 </div>
                 <div class="form-group col-md-4">
@@ -744,7 +744,7 @@ class ProductController extends Controller
                             <i class="ni ni-basket text-success text-gradient"></i>
                         </span>
                         <div class="timeline-content">
-                            <h6 class="text-dark text-sm font-weight-bold mb-0">' . json_decode($value->content)->text . ' <a href="' . url('products/detail/' . $value->product_id) . '" class="text-primary text-xs font-weight-bold">Lihat detail</a></h6>
+                            <h6 class="text-dark text-sm font-weight-bold mb-0">' . json_decode($value->content)->text . ' <a href="' . url('products/product-list/detail/' . $value->product_id) . '" class="text-primary text-xs font-weight-bold">Lihat detail</a></h6>
                             <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . '</p>
                             <span class="text-xs font-weight-bold mb-0">Ditambahkan oleh: <span class="text-dark text-xs font-weight-bold mb-0">' . User::find($value->created_by)->name . '</span></span>
                         </div>

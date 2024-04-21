@@ -37,29 +37,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                @switch(Request::segment(1))
-                    @case('category')
-                        @php
-                            $active = 'active';
-                            $show = 'show';
-                        @endphp
-                    @break
-
-                    @case('products')
-                        @php
-                            $active = 'active';
-                            $show = 'show';
-                        @endphp
-                    @break
-
-                    @default
-                        @php
-                            $active = '';
-                            $show = '';
-                        @endphp
-                    @break
-                @endswitch
-                <a class="nav-link  {{ $active }}" href="#productNav"
+                <a class="nav-link  {{ Request::segment(1) == 'products' ? 'active' : ''  }}" href="#productNav"
                     data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="productNav">
                     <div
                         class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -84,30 +62,30 @@
                     </div>
                     <span class="nav-link-text ms-1">Produk</span>
                 </a>
-                <div class="collapse {{ $show }}" id="productNav">
+                <div class="collapse {{ Request::segment(1) == 'products' ? 'show' : '' }}" id="productNav">
                     <div class="pt-1 ps-3">
-                        <a class="nav-link {{ Request::segment(1) == 'products' ? 'active' : '' }}"
+                        <a class="nav-link {{ Request::segment(2) == 'product-list' ? 'active' : '' }}"
                             href="{{ route('product.index') }}">
                             <div
                                 class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex justify-content-center">
-                                <i class="fas fa-circle {{ Request::segment(1) == 'products' ? '' : 'text-dark' }}"></i>
+                                <i class="fas fa-circle {{ Request::segment(2) == 'product-list' ? '' : 'text-dark' }}"></i>
                             </div>
                             <span class="nav-link-text ms-1">Produk</span>
                         </a>
                     </div>
                     <div class="pt-1 ps-3">
-                        <a class="nav-link {{ Request::segment(1) == 'category' ? 'active' : '' }}"
+                        <a class="nav-link {{ Request::segment(2) == 'category' ? 'active' : '' }}"
                             href="{{ route('category.index') }}">
                             <div
                                 class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex justify-content-center">
                                 <i
-                                    class="fas fa-circle {{ Request::segment(1) == 'category' ? '' : 'text-dark' }}"></i>
+                                    class="fas fa-circle {{ Request::segment(2) == 'category' ? '' : 'text-dark' }}"></i>
                             </div>
                             <span class="nav-link-text ms-1">Kategori Produk</span>
                         </a>
                     </div>
                     <div class="pt-1 ps-3">
-                        <a class="nav-link {{ Request::segment(1) == 'units' ? 'active' : '' }}"
+                        <a class="nav-link {{ Request::segment(2) == 'units' ? 'active' : '' }}"
                             href="{{ route('category.index') }}">
                             <div
                                 class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex justify-content-center">
@@ -117,7 +95,7 @@
                         </a>
                     </div>
                     <div class="pt-1 ps-3">
-                        <a class="nav-link {{ Request::segment(1) == 'barcode' ? 'active' : '' }}"
+                        <a class="nav-link {{ Request::segment(2) == 'barcode' ? 'active' : '' }}"
                             href="{{ route('category.index') }}">
                             <div
                                 class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex justify-content-center">
@@ -228,7 +206,7 @@
                 </a>
             </li>
             <li class="nav-item mt-3">
-                <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Account pages</h6>
+                <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Management pages</h6>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ Request::segment(1) == 'people' ? 'active' : '' }}" href="#peopleNav"
@@ -258,42 +236,16 @@
                             </g>
                         </svg>
                     </div>
-                    <span class="nav-link-text ms-1">Profile</span>
+                    <span class="nav-link-text ms-1">People</span>
                 </a>
-                @switch(Request::segment(2))
-                    @case('supplier')
-                        @php
-                            $active = 'active';
-                            $show = 'show';
-                        @endphp
-                    @break
-
-                    @case('customer')
-                        @php
-                            $show = 'show';
-                        @endphp
-                    @break
-
-                    @case('user')
-                        @php
-                            $show = 'show';
-                        @endphp
-                    @break
-
-                    @default
-                        @php
-                            $show = '';
-                        @endphp
-                    @break
-                @endswitch
-                <div class="collapse {{ $show }}" id="peopleNav">
+                <div class="collapse {{ Request::segment(1) == 'people' ? 'show' : ''  }}" id="peopleNav">
                     <div class="pt-1 ps-3">
-                        <a class="nav-link {{ Request::segment(1) == 'suppliers' ? 'active' : '' }}"
+                        <a class="nav-link {{ Request::segment(2) == 'supplier' ? 'active' : '' }}"
                             href="{{ route('supplier.index') }}">
                             <div
                                 class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex justify-content-center">
                                 <i
-                                    class="fas fa-circle {{ Request::segment(1) == 'suppliers' ? '' : 'text-dark' }}"></i>
+                                    class="fas fa-circle {{ Request::segment(2) == 'supplier' ? '' : 'text-dark' }}"></i>
                             </div>
                             <span class="nav-link-text ms-1">Suppliers</span>
                         </a>

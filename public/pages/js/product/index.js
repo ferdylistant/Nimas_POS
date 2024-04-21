@@ -27,7 +27,7 @@ $(document).ready(function () {
             lengthMenu: '_MENU_ /halaman',
         },
         order: [[0, 'asc']],
-        ajax: baseUrl + "/products",
+        ajax: baseUrl + "/products/product-list",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', title: 'No', searchable: false, className: 'text-center text-secondary text-sm' },
             { data: 'image', name: 'image', title: 'Gambar Produk', className: 'text-center text-secondary text-sm' },
@@ -56,7 +56,7 @@ $(document).ready(function () {
             dropdownParent: $("#mdProduct"),
             width: 'resolve',
             ajax: {
-                url: baseUrl + "/products/select2/category",
+                url: baseUrl + "/products/product-list/select2/category",
                 data: function (params) {
                     return {
                         q: params.term
@@ -88,7 +88,7 @@ $(document).ready(function () {
                 allowClear: true,
                 dropdownParent: $("#mdProduct"),
                 ajax: {
-                    url: baseUrl + "/products/select2/supplier",
+                    url: baseUrl + "/products/product-list/select2/supplier",
                     data: function (params) {
                         return {
                             q: params.term
@@ -268,7 +268,7 @@ $(document).ready(function () {
             $(this).data("page", page + 1);
             $.ajax({
                 type: "GET",
-                url: baseUrl + "/products/history/ajax-modal",
+                url: baseUrl + "/products/product-list/history/ajax-modal",
                 data: {
                     id: id,
                     page: page
@@ -291,7 +291,7 @@ $(document).ready(function () {
     async function ajaxModalProduct(el, type, id='', name='') {
         await $.ajax({
             type: "GET",
-            url: baseUrl + "/products/" + type + "/ajax-modal",
+            url: baseUrl + "/products/product-list/" + type + "/ajax-modal",
             data: {
                 id: id,
                 name: name
@@ -400,7 +400,7 @@ $(document).ready(function () {
     async function ajaxAddProduct(el) {
         await $.ajax({
             type: "POST",
-            url: baseUrl + "/products/store",
+            url: baseUrl + "/products/product-list/store",
             data: new FormData($(el).get(0)),
             processData: false,
             contentType: false,
@@ -422,7 +422,7 @@ $(document).ready(function () {
     async function ajaxAddStockProduct(el){
         await $.ajax({
             type: "POST",
-            url: baseUrl + "/products/add-stock-product-action/ajax-modal",
+            url: baseUrl + "/products/product-list/add-stock-product-action/ajax-modal",
             data: new FormData($(el).get(0)),
             processData: false,
             contentType: false,
@@ -444,7 +444,7 @@ $(document).ready(function () {
     async function ajaxEditProduct(el) {
         await $.ajax({
             type: "POST",
-            url: baseUrl + "/products/update",
+            url: baseUrl + "/products/product-list/update",
             data: new FormData($(el).get(0)),
             processData: false,
             contentType: false,
@@ -464,7 +464,7 @@ $(document).ready(function () {
     async function ajaxDeleteProduct(id) {
         await $.ajax({
             type: "DELETE",
-            url: baseUrl + "/products/delete/"+id,
+            url: baseUrl + "/products/product-list/delete/"+id,
             success: function (result) {
                 notifToast(result.status, result.message);
                 if (result.status == "success") {
@@ -527,7 +527,7 @@ $(document).ready(function () {
             $(this).find(':submit').attr('form', '');
         },
         'hide.bs.modal': function () {
-            window.history.pushState({}, '', '/products');
+            window.history.pushState({}, '', '/products/product-list');
         },
         'submit': function (e) {
             e.preventDefault();

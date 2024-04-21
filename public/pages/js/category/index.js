@@ -12,7 +12,7 @@ $(document).ready(function () {
             lengthMenu: '_MENU_ /halaman',
         },
         order: [[0, 'asc']],
-        ajax: baseUrl + "/category",
+        ajax: baseUrl + "/products/category",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', title: 'No', searchable: false, className: 'text-center text-secondary text-sm' },
             { data: 'category_name', name: 'category_name', title: 'Kategori Produk', className: 'text-center text-secondary text-sm' },
@@ -31,7 +31,7 @@ $(document).ready(function () {
     function ajaxModalCategory(el, type, id, name) {
         $.ajax({
             type: "GET",
-            url: baseUrl + "/category/" + type + "/ajax-modal",
+            url: baseUrl + "/products/category/" + type + "/ajax-modal",
             data: {
                 id: id,
                 name: name
@@ -58,7 +58,7 @@ $(document).ready(function () {
     function ajaxAddCategory(el) {
         $.ajax({
             type: "POST",
-            url: baseUrl + "/category/store",
+            url: baseUrl + "/products/category/store",
             data: new FormData($(el).get(0)),
             processData: false,
             contentType: false,
@@ -80,7 +80,7 @@ $(document).ready(function () {
     function ajaxEditCategory(el) {
         $.ajax({
             type: "POST",
-            url: baseUrl + "/category/update",
+            url: baseUrl + "/products/category/update",
             data: new FormData($(el).get(0)),
             processData: false,
             contentType: false,

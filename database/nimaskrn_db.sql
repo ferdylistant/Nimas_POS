@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 15, 2024 at 07:41 PM
+-- Generation Time: Apr 21, 2024 at 06:43 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -222,7 +222,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (15, '2019_08_19_000000_create_failed_jobs_table', 13),
 (16, '2019_12_14_000001_create_personal_access_tokens_table', 13),
 (17, '2024_03_25_143522_create_product_suppliers_table', 13),
-(18, '2024_03_26_032512_create_product_selling_prices_table', 14);
+(18, '2024_03_26_032512_create_product_selling_prices_table', 14),
+(19, '2024_04_21_151143_create_supplier_histories_table', 15);
 
 -- --------------------------------------------------------
 
@@ -427,9 +428,7 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `category_id`, `product_name`, `product_code`, `image`, `total_stock`, `unit_satuan`, `created_at`, `updated_at`) VALUES
-(1, 10, 'Coca-cola', '0002082669873', 'NBfOw8AwNJlyzOobGZ8gVBVIgUjB8IF0dPzjkZjc.jpg', 266, 'cup', '2024-04-07 14:48:46', '2024-04-07 14:48:46'),
-(2, 9, 'Indomie', '423423', '0j1PcpzrjRMRuGaLxF7HljtVuRB3dNXKYgnsLB2v.jpg', 82, 'pcs', '2024-04-07 14:53:54', '2024-04-07 14:53:54'),
-(3, 12, 'Black ID', '88129919911', '9r9EF5NtxWK7DjQSltiR1ugVPhIOsMHgjRdx8S9Y.jpg', 50, 'pcs', '2024-04-15 09:22:06', '2024-04-15 09:22:06');
+(4, 7, 'Converse', '23123124444', 'TV62RMHh6kGnb2IjcdDHSndBhMKCUciZEBVYdXhK.jpg', 50, 'pack', '2024-04-21 05:21:27', '2024-04-21 05:21:27');
 
 -- --------------------------------------------------------
 
@@ -451,7 +450,7 @@ CREATE TABLE `product_histories` (
 --
 
 INSERT INTO `product_histories` (`id`, `product_id`, `type_history`, `content`, `created_at`, `created_by`) VALUES
-(1, 3, 'create', '{\"text\":\"Product Black ID dibuat.\"}', '2024-04-15 16:22:06', 1);
+(6, 4, 'create', '{\"text\":\"Produk (Converse) dibuat.\"}', '2024-04-21 05:21:27', 1);
 
 -- --------------------------------------------------------
 
@@ -473,11 +472,8 @@ CREATE TABLE `product_selling_prices` (
 --
 
 INSERT INTO `product_selling_prices` (`id`, `product_id`, `type`, `selling_price`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Harga Grosir', 15000, '2024-04-07 14:48:46', '2024-04-07 14:48:46'),
-(2, 2, 'Harga Dasar', 25000, '2024-04-07 14:53:54', '2024-04-07 14:53:54'),
-(3, 2, 'Harga Grosir', 20000, '2024-04-07 14:53:54', '2024-04-07 14:53:54'),
-(4, 3, 'Harga Dasar', 110000, '2024-04-15 09:22:06', '2024-04-15 09:22:06'),
-(5, 3, 'Harga Grosir', 105000, '2024-04-15 09:22:06', '2024-04-15 09:22:06');
+(14, 4, 'Harga Dasar', 200000, '2024-04-21 05:21:27', '2024-04-21 05:21:27'),
+(15, 4, 'Harga Grosir', 199964, '2024-04-21 05:21:27', '2024-04-21 05:21:27');
 
 -- --------------------------------------------------------
 
@@ -501,15 +497,7 @@ CREATE TABLE `product_suppliers` (
 --
 
 INSERT INTO `product_suppliers` (`id`, `product_id`, `supplier_id`, `product_qty`, `buying_price`, `buying_date`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 15, '13000', '2024-04-07', '2024-04-07 14:48:46', '2024-04-07 14:48:46'),
-(2, 1, 2, 55, '12000', '2024-04-06', '2024-04-07 14:48:46', '2024-04-07 14:48:46'),
-(3, 1, 4, 10, '10000', '2024-04-08', '2024-04-07 14:48:46', '2024-04-07 14:48:46'),
-(4, 2, 5, 32, '22000', '2024-04-05', '2024-04-07 14:53:54', '2024-04-07 14:53:54'),
-(5, 2, 1, 50, '21000', '2024-04-08', '2024-04-07 14:53:54', '2024-04-07 14:53:54'),
-(6, 1, 1, 100, '12000', '2024-04-08', '2024-04-07 14:55:40', '2024-04-07 14:55:40'),
-(7, 1, 4, 21, '11000', '2024-04-05', '2024-04-07 14:55:40', '2024-04-07 14:55:40'),
-(8, 1, 1, 65, '12000', '2024-04-08', '2024-04-07 15:10:46', '2024-04-07 15:10:46'),
-(9, 3, 3, 50, '100000', '2024-04-15', '2024-04-15 09:22:06', '2024-04-15 09:22:06');
+(20, 4, 3, 50, '200000', '2024-04-21', '2024-04-21 05:21:27', '2024-04-21 05:21:27');
 
 -- --------------------------------------------------------
 
@@ -566,7 +554,7 @@ CREATE TABLE `suppliers` (
   `photo` varchar(191) DEFAULT NULL,
   `shopname` varchar(191) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT current_timestamp()
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -574,12 +562,32 @@ CREATE TABLE `suppliers` (
 --
 
 INSERT INTO `suppliers` (`id`, `name`, `email`, `phone`, `address`, `photo`, `shopname`, `created_at`, `updated_at`) VALUES
-(1, 'Kajem Ali', 'kajem@gmail.com', '01733425325', '7 no road, Kadalpur Abasik', 'backend/supplier/1600360723.jpeg', 'Kajem Telecom', '2020-09-17 10:04:11', '2020-09-17 10:04:11'),
 (2, 'Nowshad Alam', 'nowshad33@gmail.com', '01733490325', 'Mishanpur, Barishal.', 'backend/supplier/1600434780.jpeg', 'Missan Traders', '2020-09-17 10:08:17', '2020-09-17 10:08:17'),
 (3, 'Nazim Uddin', 'Nazimhabib77@gmail.com', '01833090325', '22 no road, Rangunia', 'backend/supplier/1600360561.jpeg', 'Nazim Store', '2020-09-17 10:09:12', '2020-09-17 10:09:12'),
-(4, 'Sazzad Hossen', 'sazzad@gmail.com', '01733455325', 'Modina Tower, Prosanti Abasik', 'backend/supplier/1600360735.png', 'S store', '2020-09-17 10:37:18', '2020-09-17 10:37:18'),
-(5, 'Hasan Mehedi', 'hm@gmail.com', '017346465325', 'Jatra Bari, Dhaka', 'backend/supplier/1600404929.png', 'Mehedi Fashion', '2020-09-17 22:55:29', '2020-09-17 22:55:29'),
-(6, 'Halima Khaton', 'halima@gmail.com', '01779427019', 'Savar, Dhaka', 'backend/supplier/1600404995.jpeg', 'Khaton\'s Kitchen', '2020-09-17 22:56:35', '2020-09-17 22:56:35');
+(6, 'Halima Khaton', 'halima@gmail.com', '01779427019', 'Savar, Dhaka', 'backend/supplier/1600404995.jpeg', 'Khaton\'s Kitchen', '2020-09-17 22:56:35', '2020-09-17 22:56:35'),
+(15, 'Ferdyawan Listanto', 'ferdylucker@gmail.com', '08886998686', 'jl.sawa', 'default.jpg', 'Kreatic', '2024-04-21 12:07:10', '2024-04-21 12:07:10');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `supplier_histories`
+--
+
+CREATE TABLE `supplier_histories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `supplier_id` bigint(20) UNSIGNED NOT NULL,
+  `type_history` enum('create','update') NOT NULL,
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`content`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_by` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `supplier_histories`
+--
+
+INSERT INTO `supplier_histories` (`id`, `supplier_id`, `type_history`, `content`, `created_at`, `created_by`) VALUES
+(1, 15, 'create', '{\"text\":\"Supplier (Ferdyawan Listanto) dibuat.\"}', '2024-04-21 12:07:10', 1);
 
 -- --------------------------------------------------------
 
@@ -729,6 +737,14 @@ ALTER TABLE `suppliers`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `supplier_histories`
+--
+ALTER TABLE `supplier_histories`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `supplier_id` (`supplier_id`),
+  ADD KEY `created_by` (`created_by`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -779,7 +795,7 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -809,25 +825,25 @@ ALTER TABLE `pos`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `product_histories`
 --
 ALTER TABLE `product_histories`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `product_selling_prices`
 --
 ALTER TABLE `product_selling_prices`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `product_suppliers`
 --
 ALTER TABLE `product_suppliers`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `salaries`
@@ -839,7 +855,13 @@ ALTER TABLE `salaries`
 -- AUTO_INCREMENT for table `suppliers`
 --
 ALTER TABLE `suppliers`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `supplier_histories`
+--
+ALTER TABLE `supplier_histories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -870,6 +892,13 @@ ALTER TABLE `product_selling_prices`
 ALTER TABLE `product_suppliers`
   ADD CONSTRAINT `product_suppliers_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `product_suppliers_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `supplier_histories`
+--
+ALTER TABLE `supplier_histories`
+  ADD CONSTRAINT `supplier_histories_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `supplier_histories_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
