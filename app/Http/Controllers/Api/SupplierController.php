@@ -351,7 +351,7 @@ class SupplierController extends Controller
                         </span>
                         <div class="timeline-content">
                             <h6 class="text-dark text-sm font-weight-bold mb-0">' . json_decode($value->content)->text . '</h6>
-                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . '</p>
+                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . ' - ' . Carbon::parse($value->created_at)->format('d/m/Y H:i') . '</p>
                             <span class="text-xs font-weight-bold mb-0">Dibuat oleh: <span class="text-dark text-xs font-weight-bold mb-0">' . User::find($value->created_by)->name . '</span></span>
                         </div>
                         </div>';
@@ -380,7 +380,7 @@ class SupplierController extends Controller
                         if (json_decode($value->content)->photo_his != null) {
                             $htmlSub .= '<h6 class="text-dark text-sm font-weight-bold mb-0">Photo: <b>Photo supplier diubah</b></h6>';
                         }
-                        $htmlSub .= '<p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . '</p>
+                        $htmlSub .= '<p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . ' - ' . Carbon::parse($value->created_at)->format('d/m/Y H:i') . '</p>
                             <span class="text-xs font-weight-bold mb-0">Diubah oleh: <span class="text-dark text-xs font-weight-bold mb-0">' . User::find($value->created_by)->name . '</span></span>
                         </div>
                         </div>';

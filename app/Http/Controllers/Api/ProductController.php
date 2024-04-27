@@ -248,15 +248,14 @@ class ProductController extends Controller
                     'message' => $validators->errors()
                 ]);
             }
-            $imgProduct = DB::table('products')->where('id',$id)->first()->image;
+            $dataProduct = DB::table('products')->where('id',$id)->first();
+            $imgProduct = $dataProduct->image;
             //Table Supplier
-            $idProductSupplier = $request->id_product_supplier;
             $supplierId = $request->supplier_id;
             $buyingPrice = $request->buying_price;
             $productQuantity = $request->product_quantity;
             $buyingDate = $request->buying_date;
             //Table Selling Price
-            $id_selling_price = $request->id_selling_price;
             $sellingPriceType = $request->selling_price_type;
             $sellingPrice = $request->selling_price;
             $unique = array_unique($supplierId);
@@ -282,7 +281,9 @@ class ProductController extends Controller
                 'unit_satuan' => $request->unit_satuan,
                 'total_stock' => array_sum($productQuantity),
             ]);
+            // $dataSupplier = DB::table('product_suppliers')->where('product_id', $id)->get();
             DB::table('product_suppliers')->where('product_id', $id)->delete();
+            // $dataSellingPrice = DB::table('product_selling_prices')->where('product_id', $id)->get();
             DB::table('product_selling_prices')->where('product_id', $id)->delete();
             for ($i = 0; $i < count($supplierId); $i++) {
                 $product_supplier = new ProductSupplier;
@@ -300,13 +301,22 @@ class ProductController extends Controller
                 $product_selling->selling_price = $sellingPrice[$k];
                 $product_selling->save();
             }
-            // $history = [
-
-            // ];
+            $history = [
+                'product_name_his' => $dataProduct->product_name === $request->product_name ? NULL : $dataProduct->product_name,
+                'product_name_new' => $dataProduct->product_name === $request->product_name ? NULL : $request->product_name,
+                'product_code_his' => $dataProduct->product_code === $request->product_code ? NULL : $dataProduct->product_code,
+                'product_code_new' => $dataProduct->product_code === $request->product_code ? NULL : $request->product_code,
+                'category_id_his' => $dataProduct->category_id === $request->category_id ? NULL : $dataProduct->category_id,
+                'category_id_new' => $dataProduct->category_id === $request->category_id ? NULL : $request->category_id,
+                'unit_satuan_his' => $dataProduct->unit_satuan === $request->unit_satuan ? NULL : $dataProduct->unit_satuan,
+                'unit_satuan_new' => $dataProduct->unit_satuan === $request->unit_satuan ? NULL : $request->unit_satuan,
+                'image_his' => $dataProduct->image === $imgProduct ? NULL : $dataProduct->image,
+                'image_new' => $dataProduct->image === $imgProduct ? NULL : $imgProduct,
+            ];
             DB::table('product_histories')->insert([
                 'product_id' => $id,
                 'type_history' => 'update',
-                'content' => json_encode(['text' => 'Produk (' . $request->product_name . ') diubah.']),
+                'content' => json_encode($history),
                 'created_by' => auth()->user()->id
             ]);
             DB::commit();
@@ -730,13 +740,36 @@ class ProductController extends Controller
                         </span>
                         <div class="timeline-content">
                             <h6 class="text-dark text-sm font-weight-bold mb-0">' . json_decode($value->content)->text . '</h6>
-                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . '</p>
+                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . ' - ' . Carbon::parse($value->created_at)->format('d/m/Y H:i') . '</p>
                             <span class="text-xs font-weight-bold mb-0">Dibuat oleh: <span class="text-dark text-xs font-weight-bold mb-0">' . User::find($value->created_by)->name . '</span></span>
                         </div>
                         </div>';
                         break;
                     case 'update':
-
+                        $htmlSub .= '<div class="timeline-block">
+                        <span class="timeline-step">
+                            <i class="ni ni-bell-55 text-warning text-gradient"></i>
+                        </span>
+                        <div class="timeline-content">';
+                        if (json_decode($value->content)->product_name_his != null) {
+                            $htmlSub .= '<h6 class="text-dark text-sm font-weight-bold mb-0">Nama produk: <b>' . json_decode($value->content)->product_name_his . '</b>, diubah menjadi: <b>' . json_decode($value->content)->product_name_new . '</b></h6>';
+                        }
+                        if (json_decode($value->content)->product_code_his != null) {
+                            $htmlSub .= '<h6 class="text-dark text-sm font-weight-bold mb-0">Kode produk: <b>' . json_decode($value->content)->product_code_his . '</b>, diubah menjadi: <b>' . json_decode($value->content)->product_code_new . '</b></h6>';
+                        }
+                        if (json_decode($value->content)->category_id_his != null) {
+                            $htmlSub .= '<h6 class="text-dark text-sm font-weight-bold mb-0">Kategori produk: <b>' . Category::find(json_decode($value->content)->category_id_his)->category_name . '</b>, diubah menjadi: <b>' . Category::find(json_decode($value->content)->category_id_new)->category_name . '</b></h6>';
+                        }
+                        if (json_decode($value->content)->unit_satuan_his != null) {
+                            $htmlSub .= '<h6 class="text-dark text-sm font-weight-bold mb-0">Unit/Satuan: <b>' . json_decode($value->content)->unit_satuan_his . '</b>, diubah menjadi: <b>' . json_decode($value->content)->unit_satuan_new . '</b></h6>';
+                        }
+                        if (json_decode($value->content)->image_his != null) {
+                            $htmlSub .= '<h6 class="text-dark text-sm font-weight-bold mb-0">Gambar produk <b>diubah</b></h6>';
+                        }
+                        $htmlSub .= '<p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . ' - ' . Carbon::parse($value->created_at)->format('d/m/Y H:i') . '</p>
+                            <span class="text-xs font-weight-bold mb-0">Diubah oleh: <span class="text-dark text-xs font-weight-bold mb-0">' . User::find($value->created_by)->name . '</span></span>
+                        </div>
+                        </div>';
                         break;
                     case 'add_stock':
                         $htmlSub .= '<div class="timeline-block">
@@ -745,7 +778,7 @@ class ProductController extends Controller
                         </span>
                         <div class="timeline-content">
                             <h6 class="text-dark text-sm font-weight-bold mb-0">' . json_decode($value->content)->text . ' <a href="' . url('products/product-list/detail/' . $value->product_id) . '" class="text-primary text-xs font-weight-bold">Lihat detail</a></h6>
-                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . '</p>
+                            <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . Carbon::parse($value->created_at)->diffForHumans() . ' - ' . Carbon::parse($value->created_at)->format('d/m/Y H:i') . '</p>
                             <span class="text-xs font-weight-bold mb-0">Ditambahkan oleh: <span class="text-dark text-xs font-weight-bold mb-0">' . User::find($value->created_by)->name . '</span></span>
                         </div>
                         </div>';
