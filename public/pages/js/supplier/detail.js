@@ -1,71 +1,33 @@
 $(document).ready(function () {
-    function ajaxModalBarcode(el, id) {
-        $.ajax({
-            type: "GET",
-            url: window.location.origin + "/products/product-list/detail/" + id,
-            data: {
-                req: "get-barcode",
-            },
-            success: function (data) {
-                el.find('#titleModalBarcode').html(data.title);
-                el.find('#mainContent').html(data.html);
-            },
-            error: function (data) {
-                notifToast("error", data.responseJSON.message);
-            }
-        });
-    }
-    $('#mdBarcode').on({
-        'show.bs.modal': function (e) {
-            let id = window.location.pathname.split("/").pop();
-            let el = $(this);
-            $('#mainContent').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
-            ajaxModalBarcode(el, id);
+    let baseUrl = window.location.origin;
+    let id = window.location.pathname.split("/").pop();
+    let tbSupplier = $('#tableSupplier').DataTable({
+        "responsive": true,
+        "autoWidth": true,
+        scrollX: true,
+        scrollY: 300,
+        fixedColumns: {
+            left: 0,
+            right: 1
         },
-        'hidden.bs.modal': function () {
-            $(this).find('#mainContent').html('');
-            $(this).find('#titleModalBarcode').html('');
-        }
+        processing: true,
+        serverSide: false,
+        language: {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            lengthMenu: '_MENU_ /halaman',
+        },
+        order: [[0, 'asc']],
+        ajax: baseUrl + "/people/supplier/detail/"+id,
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', title: 'No', searchable: false, className: 'text-center text-secondary text-sm' },
+            { data: 'product_code', name: 'product_code', title: 'Kode Produk', className: 'text-center text-secondary text-sm' },
+            { data: 'product_name', name: 'product_name', title: 'Nama Produk', className: 'text-center text-secondary text-sm' },
+            { data: 'product_qty', name: 'product_qty', title: 'Stok', className: 'text-center text-secondary text-sm' },
+            { data: 'buying_price', name: 'buying_price', title: 'Harga Beli', className: 'text-center text-secondary text-sm' },
+            { data: 'buying_date', name: 'buying_date', title: 'Stok', className: 'text-center text-secondary text-sm' },
+            { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false, className: 'text-center text-sm' },
+        ]
     });
-    async function ajaxCollapseTable(productId, supplierId, unitSatuan,indexCol) {
-        await $.ajax({
-            type: "GET",
-            url: window.location.origin + "/products/product-list/detail/" + productId,
-            data: {
-                req: "get-supplier",
-                supplierId: supplierId,
-                unitSatuan: unitSatuan
-            },
-            success: function (data) {
-                $('#contentTable'+indexCol).html(data);
-            },
-            error: function (data) {
-                notifToast("error", data.responseJSON.message);
-            }
-        });
-    }
-    $('#tableSupplier').on({
-        'show.bs.collapse': (e) => {
-            var productId = e.target.dataset.productId;
-            var supplierId = e.target.dataset.supplierId;
-            var unitSatuan = e.target.dataset.unit;
-            var indexCol = e.target.dataset.indexcol;
-            $('#' + e.currentTarget.ownerDocument.activeElement.id).html('<i class="fas fa-minus-circle text-gradient text-primary"></i> ');
-            $('#contentTable'+indexCol).html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
-            ajaxCollapseTable(productId, supplierId, unitSatuan,indexCol);
 
-        },
-        'hidden.bs.collapse': (e) => {
-            $('#' + e.currentTarget.ownerDocument.activeElement.id).html('<i class="fas fa-plus-circle text-gradient text-dark"></i> ');
-        }
-    });
-    // $('.btn-toggle-collapse').click(function (e) {
-    //     // console.log(e.currentTarget.id);
-    //     if ($('#' + e.currentTarget.id + ' i').hasClass('fas fa-plus-circle')) {
-    //         $('#' + e.currentTarget.id).html('<i class="fas fa-minus-circle"></i> ');
-    //     }
-    //     else {
-    //         $('#' + e.currentTarget.id).html('<i class="fas fa-plus-circle"></i> ');
-    //     }
-    // })
 });

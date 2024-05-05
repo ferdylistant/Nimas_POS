@@ -17,9 +17,9 @@
                             <h6>Detail Produk</h6>
                         </div>
                         <div class="col-lg-6 col-5 my-auto text-end">
-                            <a href="{{ url('products') }}" class="btn bg-gradient-primary btn-sm"><i
+                            <button onclick="history.back()" class="btn bg-gradient-primary btn-sm"><i
                                     class="fa fa-arrow-left"></i>
-                                Kembali</a>
+                                Kembali</button>
                         </div>
                     </div>
                     <hr class="horizontal dark mt-0">
@@ -52,7 +52,7 @@
                                     <li class="list-group-item align-items-center">
                                         <span class="text-sm">Category</span>
                                         <br>
-                                        <span class="text-dark">{{ $product->product_name }}</span>
+                                        <span class="text-dark">{{ $product->category_name }}</span>
                                     </li>
                                     <li class="list-group-item align-items-center">
                                         <span class="text-sm">Stock</span>

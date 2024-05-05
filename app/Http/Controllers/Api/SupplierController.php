@@ -114,8 +114,40 @@ class SupplierController extends Controller
     }
     public function show($id)
     {
+        if (request()->ajax()) {
+            $data = DB::table('product_suppliers as ps')
+            ->join('products as p','ps.product_id','=','p.id')
+            ->where('ps.supplier_id',$id)
+            ->select('ps.*','p.product_name','p.product_code')
+            ->get();
+            $dataTables = DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('buying_date', function ($data) {
+                    return Carbon::parse($data->buying_date)->translatedFormat('d M Y');
+                })
+                ->addColumn('action', function ($data) {
+                    $option = '';
+                    $option .= '<a href="'.url('products/product-list/detail/'.$data->product_id).'"><i class="fas fa-eye"></i></a>';
+                    return $option;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+            return $dataTables;
+        }
         $supplier = DB::table('suppliers')->where('id', $id)->first();
-        return response()->json($supplier);
+        return view('pages.supplier.detail', [
+            'supplier' => $supplier,
+            'breadcrumb' => '<nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="' . route('dashboard') . '">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="' . route('supplier.index') . '">Supplier</a>
+                </li>
+                <li class="breadcrumb-item text-sm text-primary active" aria-current="page">Detail</li>
+            </ol>
+            <h6 class="font-weight-bolder mb-0">Detail</h6>
+        </nav>'
+        ]);
     }
     public function update(Request $request)
     {
@@ -132,7 +164,7 @@ class SupplierController extends Controller
                 }
             }
             DB::beginTransaction();
-            DB::table('suppliers')->where('id', $request->id)->update([
+            $update = DB::table('suppliers')->where('id', $request->id)->update([
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
@@ -140,26 +172,28 @@ class SupplierController extends Controller
                 'shopname' => $request->shopname,
                 'photo' => $imgSupplier
             ]);
-            $content = [
-                'name_his' => $request->name === $data->name ? NULL : $data->name,
-                'name_new' => $request->name === $data->name ? NULL : $request->name,
-                'email_his' => $request->email === $data->email ? NULL : $data->email,
-                'email_new' => $request->email === $data->email ? NULL : $request->email,
-                'phone_his' => $request->phone === $data->phone ? NULL : $data->phone,
-                'phone_new' => $request->phone === $data->phone ? NULL : $request->phone,
-                'address_his' => $request->address === $data->address ? NULL : $data->address,
-                'address_new' => $request->address === $data->address ? NULL : $request->address,
-                'shopname_his' => $request->shopname === $data->shopname ? NULL : $data->shopname,
-                'shopname_new' => $request->shopname === $data->shopname ? NULL : $request->shopname,
-                'photo_his' => $imgSupplier === $data->photo ? NULL : $data->photo,
-                'photo_new' => $imgSupplier === $data->photo ? NULL : $imgSupplier
-            ];
-            DB::table('supplier_histories')->insert([
-                'supplier_id' => $request->id,
-                'type_history' => 'update',
-                'content' =>  json_encode($content),
-                'created_by' => auth()->user()->id
-            ]);
+            if ($update) {
+                $content = [
+                    'name_his' => $request->name === $data->name ? NULL : $data->name,
+                    'name_new' => $request->name === $data->name ? NULL : $request->name,
+                    'email_his' => $request->email === $data->email ? NULL : $data->email,
+                    'email_new' => $request->email === $data->email ? NULL : $request->email,
+                    'phone_his' => $request->phone === $data->phone ? NULL : $data->phone,
+                    'phone_new' => $request->phone === $data->phone ? NULL : $request->phone,
+                    'address_his' => $request->address === $data->address ? NULL : $data->address,
+                    'address_new' => $request->address === $data->address ? NULL : $request->address,
+                    'shopname_his' => $request->shopname === $data->shopname ? NULL : $data->shopname,
+                    'shopname_new' => $request->shopname === $data->shopname ? NULL : $request->shopname,
+                    'photo_his' => $imgSupplier === $data->photo ? NULL : $data->photo,
+                    'photo_new' => $imgSupplier === $data->photo ? NULL : $imgSupplier
+                ];
+                DB::table('supplier_histories')->insert([
+                    'supplier_id' => $request->id,
+                    'type_history' => 'update',
+                    'content' =>  json_encode($content),
+                    'created_by' => auth()->user()->id
+                ]);
+            }
             DB::commit();
             return response()->json([
                 'status' => 'success',
@@ -238,30 +272,30 @@ class SupplierController extends Controller
                     <span id="err_name"></span>
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="emailField" class="col-form-label mb-2">Email: <span class="text-danger">*</span></label>
+                    <label for="emailField" class="col-form-label">Email: <span class="text-danger">*</span></label>
                     <input type="email" name="email" id="emailField" class="form-control form-control-sm" placeholder="example@gmail.com" required>
                     <span id="err_email"></span>
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="phoneField" class="col-form-label mb-2">Phone: <span class="text-danger">*</span></label>
+                    <label for="phoneField" class="col-form-label">Phone: <span class="text-danger">*</span></label>
                     <input type="text" name="phone" id="phoneField" class="form-control form-control-sm" placeholder="08*********" required>
                     <span id="err_phone"></span>
                 </div>
             </div>
             <div class="row">
                 <div class="form-group col-md-6">
-                    <label for="addressField" class="col-form-label mb-2">Address: <span class="text-danger">*</span></label>
+                    <label for="addressField" class="col-form-label">Address: <span class="text-danger">*</span></label>
                     <textarea name="address" id="addressField" class="form-control form-control-sm" placeholder="Enter Address" required></textarea>
                     <span id="err_address"></span>
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="shopnameField" class="col-form-label mb-2">Shop Name: <small class="text-secondary">(Opsional)</small></label>
+                    <label for="shopnameField" class="col-form-label">Shop Name: <small class="text-secondary">(Opsional)</small></label>
                     <input type="text" name="shopname" id="shopnameField" class="form-control form-control-sm" placeholder="Enter Shop Name">
                 </div>
             </div>
             <div class="row">
                 <div class="form-group col-md-12">
-                    <label for="photoField" class="col-form-label mb-2">Photo: <small class="text-secondary">(Opsional)</small></label>
+                    <label for="photoField" class="col-form-label">Photo: <small class="text-secondary">(Opsional)</small></label>
                     <input type="file" name="photo" id="photoField" onchange="onFileSelected(event)" class="form-control form-control-sm">
                     <span id="err_photo"></span>
                 </div>
@@ -290,31 +324,31 @@ class SupplierController extends Controller
                     <span id="err_name"></span>
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="emailField" class="col-form-label mb-2">Email: <span class="text-danger">*</span></label>
+                    <label for="emailField" class="col-form-label">Email: <span class="text-danger">*</span></label>
                     <input type="email" name="email" id="emailField" class="form-control form-control-sm" value="' . $data->email . '" placeholder="example@gmail.com" required>
                     <span id="err_email"></span>
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="phoneField" class="col-form-label mb-2">Phone: <span class="text-danger">*</span></label>
+                    <label for="phoneField" class="col-form-label">Phone: <span class="text-danger">*</span></label>
                     <input type="text" name="phone" id="phoneField" class="form-control form-control-sm" value="' . $data->phone . '" placeholder="08*********" required>
                     <span id="err_phone"></span>
                 </div>
             </div>
             <div class="row">
                 <div class="form-group col-md-6">
-                    <label for="addressField" class="col-form-label mb-2">Address: <span class="text-danger">*</span></label>
+                    <label for="addressField" class="col-form-label">Address: <span class="text-danger">*</span></label>
                     <textarea name="address" id="addressField" class="form-control form-control-sm" placeholder="Enter Address" required>' . $data->address . '</textarea>
                     <span id="err_address"></span>
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="shopnameField" class="col-form-label mb-2">Shop Name: <small class="text-secondary">(Opsional)</small></label>
+                    <label for="shopnameField" class="col-form-label">Shop Name: <small class="text-secondary">(Opsional)</small></label>
                     <input type="text" name="shopname" id="shopnameField" class="form-control form-control-sm" value="' . $data->shopname . '" placeholder="Enter Shop Name">
                 </div>
             </div>
             <div class="row">
             <div id="imgEdit">
                 <div class="form-group col-md-12">
-                    <label for="imageField" class="col-form-label mb-2">Photo: <small class="text-secondary">(Opsional)</small></label>
+                    <label for="imageField" class="col-form-label">Photo: <small class="text-secondary">(Opsional)</small></label>
                     <br>
                     <img src="' . asset('storage/supplier/img/' . $data->photo) . '" width="200" class="img-thumbnail rounded">
                 </div>

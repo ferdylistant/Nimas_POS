@@ -4,6 +4,7 @@ $.ajaxSetup({
     },
     statusCode: {
         401: function() {
+            notifToast('error', 'Session timeout, please re-login!');
             window.location.reload();
         }
     }

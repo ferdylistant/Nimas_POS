@@ -33,11 +33,11 @@
                                             data-bs-target="#mdSupplier"><i
                                                 class="fa fa-plus me-2"></i>
                                             Create</a></li>
-                                    <li><a class="dropdown-item border-radius-md" href="javascript:;"><i
+                                    {{-- <li><a class="dropdown-item border-radius-md" href="javascript:;"><i
                                                 class="fa fa-eye me-2"></i> Preview</a>
                                     </li>
                                     <li><a class="dropdown-item border-radius-md text-danger" href="javascript:;"><i
-                                                class="fa fa-trash me-2"></i> Delete All</a></li>
+                                                class="fa fa-trash me-2"></i> Delete All</a></li> --}}
                                 </ul>
                             </div>
                         </div>

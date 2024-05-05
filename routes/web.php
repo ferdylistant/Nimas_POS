@@ -39,6 +39,14 @@ Route::middleware(['auth'])->group(function () use ($path) {
             Route::get('/select2/{type}', $path . '\Api\ProductController@select2');
         });
     });
+    Route::prefix('transaction')->group(function () use ($path) {
+        Route::prefix('orders')->group(function () use ($path) {
+           Route::get('/', $path . '\Api\OrderController@index')->name('orders.index');
+           Route::match(['get', 'post'], '/{type}/ajax-modal', $path . '\Api\OrderController@ajaxModal');
+           Route::get('/detail/{id}', $path . '\Api\OrderController@show');
+           Route::get('/select2/{type}', $path . '\Api\OrderController@select2');
+        });
+    });
     Route::prefix('people')->group(function () use ($path) {
         Route::prefix('supplier')->group(function () use ($path) {
             Route::get('/', $path . '\Api\SupplierController@index')->name('supplier.index');
@@ -47,6 +55,14 @@ Route::middleware(['auth'])->group(function () use ($path) {
             Route::get('/detail/{id}', $path . '\Api\SupplierController@show');
             Route::post('/update', $path . '\Api\SupplierController@update');
             Route::delete('/delete/{id}', $path . '\Api\SupplierController@destroy');
+        });
+        Route::prefix('customer')->group(function () use ($path) {
+            Route::get('/', $path . '\Api\CustomerController@index')->name('customer.index');
+            Route::match(['get', 'post'], '/{type}/ajax-modal', $path . '\Api\CustomerController@ajaxModal');
+            Route::post('/store', $path . '\Api\CustomerController@store');
+            Route::get('/detail/{id}', $path . '\Api\CustomerController@show');
+            Route::post('/update', $path . '\Api\CustomerController@update');
+            Route::delete('/delete/{id}', $path . '\Api\CustomerController@destroy');
         });
     });
 });

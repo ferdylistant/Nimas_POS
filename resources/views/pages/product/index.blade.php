@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title')
-    {{ config('app.name', 'Laravel') }} | Produk
+    {{ config('app.name', 'Laravel') }} | Products
 @endsection
 @section('cssRequired')
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.bootstrap5.css">
@@ -19,7 +19,7 @@
                 <div class="card-header pb-0">
                     <div class="row">
                         <div class="col-lg-6 col-7">
-                            <h6>Produk List</h6>
+                            <h6>Product List</h6>
                         </div>
                         <div class="col-lg-6 col-5 my-auto text-end">
                             <div class="dropdown float-lg-end pe-4">

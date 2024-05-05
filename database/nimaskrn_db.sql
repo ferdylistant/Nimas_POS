@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 21, 2024 at 06:43 PM
+-- Generation Time: May 05, 2024 at 08:00 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -81,7 +81,33 @@ INSERT INTO `customers` (`id`, `name`, `email`, `phone`, `address`, `photo`, `cr
 (6, 'jahed H Hossen', 'jahad@gmail.com', '01733455325', 'Prosanti Abasik', 'backend/customer/1600790335.jpeg', '2020-09-22 15:55:08', '2020-09-22 15:55:08'),
 (7, 'Afrin Sultana', 'afrinsultana370@gmail.com', '01738055325', 'Muradpur, Chattogram', 'backend/customer/1600790378.jpeg', '2020-09-22 15:59:38', '2020-09-22 15:59:38'),
 (14, 'Humaira Khaton', 'humaira@gmail.com', '0186565765', 'Rajshahi', 'backend/customer/1601041879.jpeg', '2020-09-25 13:51:19', '2020-09-25 13:51:19'),
-(15, 'Amdad Hossen', 'amdad@gmail.com', '01726262626', 'Pahartoli', 'backend/customer/1601101526.jpeg', '2020-09-26 06:25:26', '2020-09-26 06:25:26');
+(15, 'Amdad Hossen', 'amdad@gmail.com', '01726262626', 'Pahartoli', 'backend/customer/1601101526.jpeg', '2020-09-26 06:25:26', '2020-09-26 06:25:26'),
+(16, 'Ferdy Listanto', 'ferdylucker@gmail.com', '08886998686', 'Condongcatur', 'FwkriFstH7cGpgXrLoU6KaElX7J30q4jw1F7cPRp.jpg', '2024-05-01 08:01:17', '2024-05-01 08:01:17'),
+(17, 'Susanto', 'susanto@gmail.com', '0987712382321', 'Jakal', 'default.jpg', '2024-05-01 08:15:29', '2024-05-01 08:15:29');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_histories`
+--
+
+CREATE TABLE `customer_histories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `customer_id` bigint(20) UNSIGNED NOT NULL,
+  `type_history` enum('create','update') NOT NULL,
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`content`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_by` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `customer_histories`
+--
+
+INSERT INTO `customer_histories` (`id`, `customer_id`, `type_history`, `content`, `created_at`, `created_by`) VALUES
+(1, 16, 'create', '{\"text\":\"Customer (Ferdy Listant) dibuat.\"}', '2024-05-01 08:01:17', 1),
+(2, 16, 'update', '{\"name_his\":\"Ferdy Listant\",\"name_new\":\"Ferdy Listanto\",\"email_his\":null,\"email_new\":null,\"phone_his\":null,\"phone_new\":null,\"address_his\":null,\"address_new\":null,\"photo_his\":null,\"photo_new\":null}', '2024-05-01 08:14:09', 1),
+(3, 17, 'create', '{\"text\":\"Customer (Susanto) dibuat.\"}', '2024-05-01 08:15:29', 1);
 
 -- --------------------------------------------------------
 
@@ -223,7 +249,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (16, '2019_12_14_000001_create_personal_access_tokens_table', 13),
 (17, '2024_03_25_143522_create_product_suppliers_table', 13),
 (18, '2024_03_26_032512_create_product_selling_prices_table', 14),
-(19, '2024_04_21_151143_create_supplier_histories_table', 15);
+(19, '2024_04_21_151143_create_supplier_histories_table', 15),
+(20, '2024_05_01_132427_create_customer_histories_table', 16);
 
 -- --------------------------------------------------------
 
@@ -233,17 +260,20 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 
 CREATE TABLE `orders` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `customer_id` int(11) NOT NULL,
+  `customer_id` bigint(20) UNSIGNED NOT NULL,
+  `order_code` varchar(15) DEFAULT NULL,
   `qty` varchar(191) DEFAULT NULL,
   `sub_total` varchar(191) DEFAULT NULL,
-  `vat` varchar(191) DEFAULT NULL,
   `total` varchar(191) DEFAULT NULL,
   `pay` varchar(191) DEFAULT NULL,
   `due` varchar(191) DEFAULT NULL,
-  `payby` varchar(191) DEFAULT NULL,
-  `order_date` varchar(191) DEFAULT NULL,
+  `discount` varchar(100) DEFAULT NULL,
+  `note` text DEFAULT NULL,
+  `order_date` date DEFAULT NULL,
   `order_month` varchar(191) DEFAULT NULL,
   `order_year` varchar(191) DEFAULT NULL,
+  `payment_type` enum('Cash','Bank Transfer','Other') NOT NULL,
+  `status_payment` enum('Paid','Unpaid') DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -252,32 +282,32 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `customer_id`, `qty`, `sub_total`, `vat`, `total`, `pay`, `due`, `payby`, `order_date`, `order_month`, `order_year`, `created_at`, `updated_at`) VALUES
-(1, 15, '6', '3700', '4', '3848', '3000', '848', 'HandCash', '26/09/2020', 'September', '2020', NULL, NULL),
-(2, 5, '2', '1880', '4', '1955.2', '1955.2', '00', 'HandCash', '26/09/2020', 'September', '2020', '2020-09-26 06:58:17', '2020-09-26 06:58:17'),
-(3, 4, '3', '1900', '4', '1976', '1900', '976', 'Cheaque', '26/09/2020', 'September', '2020', '2020-09-26 10:13:02', '2020-09-26 10:13:02'),
-(4, 2, '4', '18700', '4', '19448', '19000', '448', 'Cheaque', '26/09/2020', 'September', '2020', '2020-09-26 15:03:11', '2020-09-26 15:03:11'),
-(5, 7, '4', '6700', '4', '6968', '6968', '00', 'Cheaque', '27/09/2020', 'September', '2020', '2020-09-26 19:10:26', '2020-09-26 19:10:26'),
-(6, 6, '2', '2400', '4', '2496', '2496', '00', 'Cheaque', '27/09/2020', 'September', '2020', '2020-09-26 19:25:58', '2020-09-26 19:25:58'),
-(7, 5, '1', '250', '4', '260', '200', '60', 'HandCash', '27/09/2020', 'September', '2020', '2020-09-27 07:21:41', '2020-09-27 07:21:41'),
-(8, 4, '1', '60000', '4', '62400', '57000', '3000', 'HandCash', '27/09/2020', 'September', '2020', '2020-09-27 10:25:17', '2020-09-27 10:25:17'),
-(9, 2, '1', '18000', '4', '18720', '15000', '3720', 'Cheaque', '29/09/2020', 'September', '2020', '2020-09-29 13:52:41', '2020-09-29 13:52:41'),
-(10, 7, '1', '180', '4', '187.2', '100', '87.2', 'Cheaque', '30/09/2020', 'September', '2020', '2020-09-30 14:41:48', '2020-09-30 14:41:48'),
-(11, 6, '4', '5100', '4', '5304', '5000', '304', 'Cheaque', '01/10/2020', 'October', '2020', '2020-10-01 13:26:10', '2020-10-01 13:26:10'),
-(12, 15, '1', '180', '4', '187.2', '100', '80', 'HandCash', '01/10/2020', 'October', '2020', '2020-10-01 14:21:08', '2020-10-01 14:21:08'),
-(14, 4, '3', '680', '4', '707.2', '600', '107.20', 'GiftCard', '03/10/2020', 'October', '2020', '2020-10-03 15:00:37', '2020-10-03 15:00:37'),
-(15, 14, '3', '25430', '4', '26447.2', '20000', '6447.20', 'HandCash', '03/10/2020', 'October', '2020', '2020-10-03 15:05:09', '2020-10-03 15:05:09'),
-(16, 5, '2', '61100', '4', '63544', '60000', '3544.00', 'Cheaque', '03/10/2020', 'October', '2020', '2020-10-03 15:07:53', '2020-10-03 15:07:53'),
-(17, 5, '2', '2500', '4', '2600', '1000', '1600.00', 'HandCash', '24/03/2021', 'March', '2021', '2021-03-24 14:01:46', '2021-03-24 14:01:46'),
-(18, 6, '1', '1600', '4', '1664', '1111', '553.00', 'HandCash', '26/03/2021', 'March', '2021', '2021-03-26 03:17:00', '2021-03-26 03:17:00'),
-(19, 14, '2', '1900', '4', '1976', '1111', '865.00', 'HandCash', '27/03/2021', 'March', '2021', '2021-03-26 19:28:37', '2021-03-26 19:28:37'),
-(20, 14, '2', '19600', '4', '20384', '443', '19941.00', 'HandCash', '27/03/2021', 'March', '2021', '2021-03-26 20:46:46', '2021-03-26 20:46:46'),
-(21, 14, '2', '3000', '4', '3120', '3000', '120.00', 'Cheaque', '27/03/2021', 'March', '2021', '2021-03-26 20:49:57', '2021-03-26 20:49:57'),
-(22, 5, '1', '500', '4', '520', '333', '187.00', 'GiftCard', '27/03/2021', 'March', '2021', '2021-03-26 20:53:25', '2021-03-26 20:53:25'),
-(23, 6, '3', '25680', '4', '26707.2', '7777', '18930.20', 'HandCash', '27/03/2021', 'March', '2021', '2021-03-26 20:59:02', '2021-03-26 20:59:02'),
-(24, 5, '2', '36000', '4', '37440', '23333', '14107.00', 'HandCash', '03/06/2021', 'June', '2021', '2021-06-03 06:45:01', '2021-06-03 06:45:01'),
-(25, 15, '1', '2000', '4', '2080', '2080', '0.00', 'HandCash', '03/06/2021', 'June', '2021', '2021-06-03 10:56:56', '2021-06-03 10:56:56'),
-(26, 4, '3', '4100', '4', '4264', '4100', '164.00', 'Cheaque', '04/06/2021', 'June', '2021', '2021-06-04 04:54:25', '2021-06-04 04:54:25');
+INSERT INTO `orders` (`id`, `customer_id`, `order_code`, `qty`, `sub_total`, `total`, `pay`, `due`, `discount`, `note`, `order_date`, `order_month`, `order_year`, `payment_type`, `status_payment`, `created_at`, `updated_at`) VALUES
+(1, 15, NULL, '6', '3700', '3848', '3000', '848', NULL, NULL, '0000-00-00', 'September', '2020', 'Cash', NULL, NULL, NULL),
+(2, 5, NULL, '2', '1880', '1955.2', '1955.2', '00', NULL, NULL, '0000-00-00', 'September', '2020', 'Cash', NULL, '2020-09-26 06:58:17', '2020-09-26 06:58:17'),
+(3, 4, NULL, '3', '1900', '1976', '1900', '976', NULL, NULL, '0000-00-00', 'September', '2020', 'Cash', NULL, '2020-09-26 10:13:02', '2020-09-26 10:13:02'),
+(4, 2, NULL, '4', '18700', '19448', '19000', '448', NULL, NULL, '0000-00-00', 'September', '2020', 'Cash', NULL, '2020-09-26 15:03:11', '2020-09-26 15:03:11'),
+(5, 7, NULL, '4', '6700', '6968', '6968', '00', NULL, NULL, '0000-00-00', 'September', '2020', 'Cash', NULL, '2020-09-26 19:10:26', '2020-09-26 19:10:26'),
+(6, 6, NULL, '2', '2400', '2496', '2496', '00', NULL, NULL, '0000-00-00', 'September', '2020', 'Cash', NULL, '2020-09-26 19:25:58', '2020-09-26 19:25:58'),
+(7, 5, NULL, '1', '250', '260', '200', '60', NULL, NULL, '0000-00-00', 'September', '2020', 'Cash', NULL, '2020-09-27 07:21:41', '2020-09-27 07:21:41'),
+(8, 4, NULL, '1', '60000', '62400', '57000', '3000', NULL, NULL, '0000-00-00', 'September', '2020', 'Cash', NULL, '2020-09-27 10:25:17', '2020-09-27 10:25:17'),
+(9, 2, NULL, '1', '18000', '18720', '15000', '3720', NULL, NULL, '0000-00-00', 'September', '2020', 'Cash', NULL, '2020-09-29 13:52:41', '2020-09-29 13:52:41'),
+(10, 7, NULL, '1', '180', '187.2', '100', '87.2', NULL, NULL, '0000-00-00', 'September', '2020', 'Cash', NULL, '2020-09-30 14:41:48', '2020-09-30 14:41:48'),
+(11, 6, NULL, '4', '5100', '5304', '5000', '304', NULL, NULL, '0000-00-00', 'October', '2020', 'Cash', NULL, '2020-10-01 13:26:10', '2020-10-01 13:26:10'),
+(12, 15, NULL, '1', '180', '187.2', '100', '80', NULL, NULL, '0000-00-00', 'October', '2020', 'Cash', NULL, '2020-10-01 14:21:08', '2020-10-01 14:21:08'),
+(14, 4, NULL, '3', '680', '707.2', '600', '107.20', NULL, NULL, '0000-00-00', 'October', '2020', 'Cash', NULL, '2020-10-03 15:00:37', '2020-10-03 15:00:37'),
+(15, 14, NULL, '3', '25430', '26447.2', '20000', '6447.20', NULL, NULL, '0000-00-00', 'October', '2020', 'Cash', NULL, '2020-10-03 15:05:09', '2020-10-03 15:05:09'),
+(16, 5, NULL, '2', '61100', '63544', '60000', '3544.00', NULL, NULL, '0000-00-00', 'October', '2020', 'Cash', NULL, '2020-10-03 15:07:53', '2020-10-03 15:07:53'),
+(17, 5, NULL, '2', '2500', '2600', '1000', '1600.00', NULL, NULL, '0000-00-00', 'March', '2021', 'Cash', NULL, '2021-03-24 14:01:46', '2021-03-24 14:01:46'),
+(18, 6, NULL, '1', '1600', '1664', '1111', '553.00', NULL, NULL, '0000-00-00', 'March', '2021', 'Cash', NULL, '2021-03-26 03:17:00', '2021-03-26 03:17:00'),
+(19, 14, NULL, '2', '1900', '1976', '1111', '865.00', NULL, NULL, '0000-00-00', 'March', '2021', 'Cash', NULL, '2021-03-26 19:28:37', '2021-03-26 19:28:37'),
+(20, 14, NULL, '2', '19600', '20384', '443', '19941.00', NULL, NULL, '0000-00-00', 'March', '2021', 'Cash', NULL, '2021-03-26 20:46:46', '2021-03-26 20:46:46'),
+(21, 14, NULL, '2', '3000', '3120', '3000', '120.00', NULL, NULL, '0000-00-00', 'March', '2021', 'Cash', NULL, '2021-03-26 20:49:57', '2021-03-26 20:49:57'),
+(22, 5, NULL, '1', '500', '520', '333', '187.00', NULL, NULL, '0000-00-00', 'March', '2021', 'Cash', NULL, '2021-03-26 20:53:25', '2021-03-26 20:53:25'),
+(23, 6, NULL, '3', '25680', '26707.2', '7777', '18930.20', NULL, NULL, '0000-00-00', 'March', '2021', 'Cash', NULL, '2021-03-26 20:59:02', '2021-03-26 20:59:02'),
+(24, 5, NULL, '2', '36000', '37440', '23333', '14107.00', NULL, NULL, '0000-00-00', 'June', '2021', 'Cash', NULL, '2021-06-03 06:45:01', '2021-06-03 06:45:01'),
+(25, 15, NULL, '1', '2000', '2080', '2080', '0.00', NULL, NULL, '0000-00-00', 'June', '2021', 'Cash', NULL, '2021-06-03 10:56:56', '2021-06-03 10:56:56'),
+(26, 4, NULL, '3', '4100', '4264', '4100', '164.00', NULL, NULL, '0000-00-00', 'June', '2021', 'Cash', NULL, '2021-06-04 04:54:25', '2021-06-04 04:54:25');
 
 -- --------------------------------------------------------
 
@@ -287,7 +317,7 @@ INSERT INTO `orders` (`id`, `customer_id`, `qty`, `sub_total`, `vat`, `total`, `
 
 CREATE TABLE `order_details` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `order_id` int(11) DEFAULT NULL,
+  `order_id` bigint(20) UNSIGNED DEFAULT NULL,
   `product_id` int(11) DEFAULT NULL,
   `pro_quantity` int(11) DEFAULT NULL,
   `product_price` int(11) DEFAULT NULL,
@@ -428,7 +458,8 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `category_id`, `product_name`, `product_code`, `image`, `total_stock`, `unit_satuan`, `created_at`, `updated_at`) VALUES
-(4, 7, 'Converse', '23123124444', 'TV62RMHh6kGnb2IjcdDHSndBhMKCUciZEBVYdXhK.jpg', 50, 'pack', '2024-04-21 05:21:27', '2024-04-21 05:21:27');
+(4, 5, 'Converse', '23123124444', 'TV62RMHh6kGnb2IjcdDHSndBhMKCUciZEBVYdXhK.jpg', 50, 'pack', '2024-04-21 05:21:27', '2024-04-21 05:21:27'),
+(5, 10, 'Coffee', '123123434323112', 'zBg1I9sTrvyofo32DMRr4IaT9HMOBwg8FZU1kPtt.png', 12, 'pcs', '2024-05-05 10:27:55', '2024-05-05 10:27:55');
 
 -- --------------------------------------------------------
 
@@ -450,7 +481,9 @@ CREATE TABLE `product_histories` (
 --
 
 INSERT INTO `product_histories` (`id`, `product_id`, `type_history`, `content`, `created_at`, `created_by`) VALUES
-(6, 4, 'create', '{\"text\":\"Produk (Converse) dibuat.\"}', '2024-04-21 05:21:27', 1);
+(6, 4, 'create', '{\"text\":\"Produk (Converse) dibuat.\"}', '2024-04-21 05:21:27', 1),
+(7, 4, 'update', '{\"product_name_his\":null,\"product_name_new\":null,\"product_code_his\":null,\"product_code_new\":null,\"category_id_his\":7,\"category_id_new\":\"5\",\"unit_satuan_his\":null,\"unit_satuan_new\":null,\"image_his\":null,\"image_new\":null}', '2024-04-27 17:07:51', 1),
+(8, 5, 'create', '{\"text\":\"Produk (Coffee) dibuat.\"}', '2024-05-05 10:27:55', 1);
 
 -- --------------------------------------------------------
 
@@ -472,8 +505,11 @@ CREATE TABLE `product_selling_prices` (
 --
 
 INSERT INTO `product_selling_prices` (`id`, `product_id`, `type`, `selling_price`, `created_at`, `updated_at`) VALUES
-(14, 4, 'Harga Dasar', 200000, '2024-04-21 05:21:27', '2024-04-21 05:21:27'),
-(15, 4, 'Harga Grosir', 199964, '2024-04-21 05:21:27', '2024-04-21 05:21:27');
+(16, 4, 'Harga Dasar', 200000, '2024-04-27 17:07:51', '2024-04-27 17:07:51'),
+(17, 4, 'Harga Grosir', 199964, '2024-04-27 17:07:51', '2024-04-27 17:07:51'),
+(18, 5, 'Harga Teman', 18000, '2024-05-05 10:27:55', '2024-05-05 10:27:55'),
+(19, 5, 'Harga Dasar', 20000, '2024-05-05 10:27:55', '2024-05-05 10:27:55'),
+(20, 5, 'Harga Naik', 27992, '2024-05-05 10:27:55', '2024-05-05 10:27:55');
 
 -- --------------------------------------------------------
 
@@ -497,7 +533,8 @@ CREATE TABLE `product_suppliers` (
 --
 
 INSERT INTO `product_suppliers` (`id`, `product_id`, `supplier_id`, `product_qty`, `buying_price`, `buying_date`, `created_at`, `updated_at`) VALUES
-(20, 4, 3, 50, '200000', '2024-04-21', '2024-04-21 05:21:27', '2024-04-21 05:21:27');
+(21, 4, 3, 50, '200000', '2024-04-21', '2024-04-27 17:07:51', '2024-04-27 17:07:51'),
+(22, 5, 15, 12, '21000', '2024-05-05', '2024-05-05 10:27:55', '2024-05-05 10:27:55');
 
 -- --------------------------------------------------------
 
@@ -564,8 +601,8 @@ CREATE TABLE `suppliers` (
 INSERT INTO `suppliers` (`id`, `name`, `email`, `phone`, `address`, `photo`, `shopname`, `created_at`, `updated_at`) VALUES
 (2, 'Nowshad Alam', 'nowshad33@gmail.com', '01733490325', 'Mishanpur, Barishal.', 'backend/supplier/1600434780.jpeg', 'Missan Traders', '2020-09-17 10:08:17', '2020-09-17 10:08:17'),
 (3, 'Nazim Uddin', 'Nazimhabib77@gmail.com', '01833090325', '22 no road, Rangunia', 'backend/supplier/1600360561.jpeg', 'Nazim Store', '2020-09-17 10:09:12', '2020-09-17 10:09:12'),
-(6, 'Halima Khaton', 'halima@gmail.com', '01779427019', 'Savar, Dhaka', 'backend/supplier/1600404995.jpeg', 'Khaton\'s Kitchen', '2020-09-17 22:56:35', '2020-09-17 22:56:35'),
-(15, 'Ferdyawan Listanto', 'ferdylucker@gmail.com', '08886998686', 'jl.sawa', 'default.jpg', 'Kreatic', '2024-04-21 12:07:10', '2024-04-21 12:07:10');
+(6, 'Halima Khaton Waton', 'halima@gmail.com', '01779427019', 'Savar, Dhaka', 'dFoDQr1kplqtPsk4Xip3ykdRolK3AMJgN0p28DmT.jpg', 'Khaton\'s Kitchen', '2020-09-17 22:56:35', '2024-04-21 17:35:54'),
+(15, 'Ferdyawan Listanto, S.Kom', 'ferdyluck@gmail.com', '08886998686', 'jl.sawa', 'B2sXx8sqcsfS9lLeVhxXDtJVNCcpOCIyAp3lYC8v.jpg', 'Kreatic ID', '2024-04-21 12:07:10', '2024-04-21 17:37:01');
 
 -- --------------------------------------------------------
 
@@ -587,7 +624,9 @@ CREATE TABLE `supplier_histories` (
 --
 
 INSERT INTO `supplier_histories` (`id`, `supplier_id`, `type_history`, `content`, `created_at`, `created_by`) VALUES
-(1, 15, 'create', '{\"text\":\"Supplier (Ferdyawan Listanto) dibuat.\"}', '2024-04-21 12:07:10', 1);
+(1, 15, 'create', '{\"text\":\"Supplier (Ferdyawan Listanto) dibuat.\"}', '2024-04-21 12:07:10', 1),
+(2, 6, 'update', '{\"name_his\":\"Halima Khaton\",\"name_new\":\"Halima Khaton Waton\",\"email_his\":null,\"email_new\":null,\"phone_his\":null,\"phone_new\":null,\"address_his\":null,\"address_new\":null,\"shopname_his\":null,\"shopname_new\":null,\"photo_his\":\"backend\\/supplier\\/1600404995.jpeg\",\"photo_new\":\"dFoDQr1kplqtPsk4Xip3ykdRolK3AMJgN0p28DmT.jpg\"}', '2024-04-21 17:35:54', 1),
+(3, 15, 'update', '{\"name_his\":\"Ferdyawan Listanto\",\"name_new\":\"Ferdyawan Listanto, S.Kom\",\"email_his\":\"ferdylucker@gmail.com\",\"email_new\":\"ferdyluck@gmail.com\",\"phone_his\":null,\"phone_new\":null,\"address_his\":null,\"address_new\":null,\"shopname_his\":\"Kreatic\",\"shopname_new\":\"Kreatic ID\",\"photo_his\":\"default.jpg\",\"photo_new\":\"B2sXx8sqcsfS9lLeVhxXDtJVNCcpOCIyAp3lYC8v.jpg\"}', '2024-04-21 17:37:01', 1);
 
 -- --------------------------------------------------------
 
@@ -633,6 +672,12 @@ ALTER TABLE `customers`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `customer_histories`
+--
+ALTER TABLE `customer_histories`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `employees`
 --
 ALTER TABLE `employees`
@@ -667,13 +712,15 @@ ALTER TABLE `migrations`
 -- Indexes for table `orders`
 --
 ALTER TABLE `orders`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_id` (`customer_id`);
 
 --
 -- Indexes for table `order_details`
 --
 ALTER TABLE `order_details`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `order_id` (`order_id`);
 
 --
 -- Indexes for table `password_resets`
@@ -765,7 +812,13 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `customer_histories`
+--
+ALTER TABLE `customer_histories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `employees`
@@ -795,7 +848,7 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -825,25 +878,25 @@ ALTER TABLE `pos`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `product_histories`
 --
 ALTER TABLE `product_histories`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `product_selling_prices`
 --
 ALTER TABLE `product_selling_prices`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `product_suppliers`
 --
 ALTER TABLE `product_suppliers`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `salaries`
@@ -861,7 +914,7 @@ ALTER TABLE `suppliers`
 -- AUTO_INCREMENT for table `supplier_histories`
 --
 ALTER TABLE `supplier_histories`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -872,6 +925,12 @@ ALTER TABLE `users`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `order_details`
+--
+ALTER TABLE `order_details`
+  ADD CONSTRAINT `order_details_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `product_histories`
