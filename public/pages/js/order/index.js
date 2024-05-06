@@ -39,7 +39,7 @@ $(document).ready(function () {
         }
     };
     var alreadyAdded = [];
-    var triggerData =[];
+    var triggerData = [];
     const rupiah = (number) => {
         return new Intl.NumberFormat("id-ID", {
             style: "currency",
@@ -73,6 +73,7 @@ $(document).ready(function () {
             container: "#mdOrder",
             position: 'bottom left',
             buttons: ['clear'],
+            selectedDates: new Date(),
             onSelect: function (selectedDates, dateStr, instance) {
                 // console.log(selectedDates.formattedDate);
                 $(el).val(selectedDates.formattedDate).valid();
@@ -113,12 +114,42 @@ $(document).ready(function () {
             }
         });
     }
-    function calc(id,price) {
-        console.log($('#quantity_'+id).val());
-        let count = parseInt(price, 10) * parseInt($('#quantity_'+id).val(), 10)
-        // console.log(count);
-        $('#price_'+id).text(rupiah(count)).change();
-      }
+    function sumSubTotal() {
+        var sum = 0;
+        $(".sub_total").each(function() {
+            var str = this.value.trim();  // .trim() may need a shim
+            if (str) {   // don't send blank values to `parseInt`
+                sum += parseInt(str, 10);
+            }
+        });
+        return sum;
+    }
+    function calc(id, price) {
+        if ($('#quantity_' + id).val() == '') {
+            $('#quantity_' + id).val(1).change();
+        }
+        let count = parseInt(price, 10) * parseInt($('#quantity_' + id).val(), 10)
+        $('#price_' + id).text(rupiah(count) == 'RpNaN' ? rupiah(0):rupiah(count)).change();
+        $('#sub_total'+id).val(count).change();
+        $('#totalPrice').text(rupiah(sumSubTotal())).change();
+        $('#total_price').val(sumSubTotal()).change();
+    }
+    function triggerElement(triggerData) {
+        $('.btnNumber').each(function() {
+            $(this).click(function (e) {
+                triggerData.forEach(entry => {
+                    calc(entry.id,entry.price);
+                });
+            })
+        });
+        $('input[type="number"]').each(function() {
+            $(this).keyup(function (e) {
+                triggerData.forEach(entry => {
+                    calc(entry.id,entry.price);
+                });
+            })
+        });
+    }
     function getSelectedProduct(id) {
         $.ajax({
             url: baseUrl + `/transaction/orders/select2/get-product-to-table`,
@@ -128,8 +159,8 @@ $(document).ready(function () {
             success: function (data) {
 
                 triggerData.push({
-                    id:data.id,
-                    price:data.selling_price
+                    id: data.id,
+                    price: data.selling_price
                 });
                 console.log(triggerData);
                 html_ = `<tr id="prow_${data.id}">
@@ -148,21 +179,22 @@ $(document).ready(function () {
                         <td><p class="text-xs font-weight-bold mb-0">${data.total_stock}</p>
                         <p class="text-xs text-secondary mb-0">${data.unit_satuan}</p></td>
                         <td><div class="number-input">
-                        <button type="button" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" class="btnNumber${data.id}"></button>
+                        <button type="button" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" class="btnNumber"></button>
                         <input class="quantity_${data.id}" min="1" name="quantity" value="1" type="number" id="quantity_${data.id}">
-                        <button type="button" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus btnNumber${data.id}"></button>
+                        <button type="button" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus btnNumber"></button>
                       </div></td>
-                        <td><h6 class="mb-0 text-sm" id="price_${data.id}">${rupiah(data.selling_price)}</h6></td>
+                        <td><h6 class="mb-0 text-sm" id="price_${data.id}">${rupiah(data.selling_price)}</h6>
+                        <input type="hidden" class="sub_total" id="sub_total${data.id}" name="price[]" value="${data.selling_price}">
+                        </td>
                         <td>
                             <a href="javascript:void(0)" class="btn btn-sm btn-primary pd-3" target="_blank">Lihat</a>
                         </td>
                     </tr>`
                 $('#tb_selectedProductOrder').find('tbody').append(html_);
                 destroySelect2();
-                triggerData.forEach(entry => {
-                    $('.btnNumber').click(calc(entry.id,entry.price));
-                    $('input[type="number"]').keyup(calc(entry.id,entry.price));
-                });
+                triggerElement(triggerData);
+                $('#totalPrice').text(rupiah(sumSubTotal())).change();
+                $('#total_price').val(sumSubTotal()).change();
             },
             error: function (err) {
 
@@ -200,6 +232,7 @@ $(document).ready(function () {
                 destroySelect2();
                 return;
             } else {
+                $('#notAvail').empty();
                 getSelectedProduct(e.params.data.id);
                 alreadyAdded.push(e.params.data.product_id);
             }
@@ -212,7 +245,7 @@ $(document).ready(function () {
         }
         var imageUrl = baseUrl + '/storage/product/img/' + option.image;
         var optionWithImage = $(
-            '<span><img src="' + imageUrl+ '" class="avatar avatar-sm me-3" alt="product image">'+option.text + ' (' + option.category_name + ')</span>'
+            '<span><img src="' + imageUrl + '" class="avatar avatar-sm me-3" alt="product image">' + option.text + ' (' + option.category_name + ')</span>'
         );
         return optionWithImage;
     }
@@ -221,7 +254,7 @@ $(document).ready(function () {
         if (!option.id) {
             return option.text;
         }
-        return $('<span>'+option.text+' ('+option.category_name+')</span>');
+        return $('<span>' + option.text + ' (' + option.category_name + ')</span>');
     }
     async function select2Product() {
         await $('.select-product').select2({
@@ -322,14 +355,26 @@ $(document).ready(function () {
                         extension: "jpg|png|jpeg|webp"
                     }
                 });
-                if (type != 'history') {
-                    airDatepicker('#dateField');
-                    select2Customer();
-                    select2Product();
+                select2Customer();
+                select2Product();
+                if (type == 'edit') {
                     $('#sellingPriceField').select2({
                         placeholder: 'Choose price',
                     });
-                } else if (type == 'history') {
+                } else if (type == 'add') {
+                    airDatepicker('#dateField');
+                    $('#discountField').keyup(function (e) {
+                        var totalPrice = $('#total_price').val();
+                        let count = parseInt(totalPrice, 10) - parseInt($(this).val(), 10);
+                        if ($(this).val() == '') {
+                            $('#totalPrice').text(rupiah(sumSubTotal())).change();
+                            $('#total_price').val(sumSubTotal()).change();
+                        } else {
+                            $('#totalPrice').text(rupiah(count)).change();
+                            $('#total_price').val(count).change();
+                        }
+                    })
+                } else{
                     $('[data-bs-toggle="tooltip"]').tooltip({
                         trigger: 'hover'
                     });

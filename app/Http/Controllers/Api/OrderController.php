@@ -211,7 +211,7 @@ class OrderController extends Controller
         $html .= '<div class="row">
                 <div class="form-group col-md-6">
                     <label for="dateField" class="col-form-label">Date: <span class="text-danger">*</span></label>
-                    <input type="text" name="date" id="dateField" class="form-control form-control-sm" placeholder="Pick date" readonly required>
+                    <input type="text" name="date" id="dateField" class="form-control form-control-sm" placeholder="Choose date" readonly required>
                 </div>
                 <div class="form-group col-md-6">
                     <label for="customerField" class="col-form-label">Customer: <span class="text-danger">*</span></label>
@@ -235,10 +235,11 @@ class OrderController extends Controller
                     <span id="err_selling_price_id"></span>
                 </div>
             </div>
-            <div class="row">
+            <div class="row mb-3">
                 <div class="form-group col-md-12">
+                    <label for="tableField" class="col-form-label">Order Table: <span class="text-danger">*</span></label>
                     <div class="table-responsive p-0">
-                    <table id="tb_selectedProductOrder" class="table align-items-center mb-0" style="width: 100%;">
+                    <table id="tb_selectedProductOrder" class="table table-striped align-items-center mb-0" style="width: 100%;">
                         <thead>
                             <tr>
                                 <th scope="col" class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product</th>
@@ -249,9 +250,38 @@ class OrderController extends Controller
                                 <th scope="col" class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody>
+                            <tr id="notAvail">
+                                <td colspan="6"><center class="text-secondary font-weight-bolder">Data not available</center></td>
+                            </tr>
+                        </tbody>
                     </table>
                     </div>
+                </div>
+            </div>
+            <div class="row justify-content-end">
+                <div class="col-4">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Discount</span>
+                                <span id="totalDiscount">Rp 0,00</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Total</span>
+                                <span id="totalPrice">Rp 0,00</span>
+                                <input type="hidden" name="total" id="total_price" value="">
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-4">
+                <label for="discountField" class="col-form-label">Discount:</label>
+                <input type="text" name="discount" id="discountField" class="form-control form-control-sm" placeholder="0,00">
                 </div>
             </div>
             </form>';
