@@ -9,15 +9,39 @@ $(document).ready(function () {
             left: 0,
             right: 1
         },
-        // columnDefs: [
-        //   {
-        //     targets: -1,
-        //     className: 'dt-body-right',
-        //     render: function (data, type, row) {
-        //         return $('.sticky-dropdown').html();
-        //       }
-        //   }
-        // ],
+        drawCallback: () => {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    trigger: 'hover'
+                })
+            });
+            var dropdownTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'))
+            const dropdown = dropdownTriggerList.map(dropdownToggleEl => {
+                var instance = new bootstrap.Dropdown(dropdownToggleEl, {
+                    // popperConfig(defaultBsPopperConfig) {
+                    //     console.log(defaultBsPopperConfig);
+                    //     return { ...defaultBsPopperConfig, strategy: "fixed" };
+                    // },
+                    boundary: "clippingParents",
+                    rootBoundary: "viewport",
+                    // strategy: "fixed",
+                    display: "static",
+                    // offset: [-300, 0],
+                });
+
+                // / /Attach event listeners to the dropdown trigger
+                dropdownToggleEl.addEventListener("show.bs.dropdown", function (event) {
+                    $(event.target).closest(".table").find(".dtfc-fixed-right").removeClass("z-index-9");
+                    $(event.target).closest("td").addClass("z-index-3");
+                });
+
+                dropdownToggleEl.addEventListener("hide.bs.dropdown", function (event) {
+                    $(event.target).closest("td").removeClass("z-index-3");
+                });
+            });
+            // console.log(tooltipTriggerList);
+        },
         // select: true,
         processing: true,
         serverSide: false,

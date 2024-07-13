@@ -8,7 +8,7 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="scrollableModal">
                 <div id="mainContent"></div>
             </div>
             <div class="modal-footer">

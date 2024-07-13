@@ -1,3 +1,6 @@
+.is-invalid .select2-container--default .select2-selection--single {
+    border-color: #dc3545;
+}
 td.z-index-3 {
     z-index: 3 !important;
 }

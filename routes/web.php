@@ -43,6 +43,7 @@ Route::middleware(['auth'])->group(function () use ($path) {
         Route::prefix('orders')->group(function () use ($path) {
            Route::get('/', $path . '\Api\OrderController@index')->name('orders.index');
            Route::match(['get', 'post'], '/{type}/ajax-modal', $path . '\Api\OrderController@ajaxModal');
+           Route::post('/store', $path . '\Api\OrderController@store');
            Route::get('/detail/{id}', $path . '\Api\OrderController@show');
            Route::get('/select2/{type}', $path . '\Api\OrderController@select2');
         });

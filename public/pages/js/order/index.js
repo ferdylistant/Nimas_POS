@@ -18,13 +18,49 @@ $(document).ready(function () {
             lengthMenu: '_MENU_ /halaman',
         },
         order: [[0, 'asc']],
+        drawCallback: () => {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    trigger: 'hover'
+                })
+            });
+            var dropdownTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'))
+            const dropdown = dropdownTriggerList.map(dropdownToggleEl => {
+                var instance = new bootstrap.Dropdown(dropdownToggleEl, {
+                    // popperConfig(defaultBsPopperConfig) {
+                    //     console.log(defaultBsPopperConfig);
+                    //     return { ...defaultBsPopperConfig, strategy: "fixed" };
+                    // },
+                    boundary: "clippingParents",
+                    rootBoundary: "viewport",
+                    // strategy: "fixed",
+                    display: "static",
+                    // offset: [-300, 0],
+                });
+
+                // / /Attach event listeners to the dropdown trigger
+                dropdownToggleEl.addEventListener("show.bs.dropdown", function (event) {
+                    $(event.target).closest(".table").find(".dtfc-fixed-right").removeClass("z-index-9");
+                    $(event.target).closest("td").addClass("z-index-3");
+                });
+
+                dropdownToggleEl.addEventListener("hide.bs.dropdown", function (event) {
+                    $(event.target).closest("td").removeClass("z-index-3");
+                });
+            });
+            // console.log(tooltipTriggerList);
+        },
         ajax: baseUrl + "/transaction/orders",
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', title: 'No', searchable: false, className: 'text-center text-secondary text-sm' },
+            { data: 'order_code', name: 'order_code', title: 'Order Code', className: 'text-center text-secondary text-sm' },
+            { data: 'status_payment', name: 'status_payment', title: 'Status', className: 'text-center text-secondary text-sm' },
             { data: 'name', name: 'name', title: 'Customer', className: 'text-center text-secondary text-sm' },
             { data: 'qty', name: 'qty', title: 'Quantity', className: 'text-center text-secondary text-sm' },
             { data: 'total', name: 'total', title: 'Total', className: 'text-center text-secondary text-sm' },
             { data: 'pay', name: 'pay', title: 'Pay', className: 'text-center text-secondary text-sm' },
+            { data: 'due', name: 'due', title: 'Due', className: 'text-center text-secondary text-sm' },
             { data: 'order_date', name: 'order_date', title: 'Order Date', className: 'text-center text-secondary text-sm' },
             { data: 'created_at', name: 'created_at', title: 'Created On', className: 'text-center text-secondary text-sm' },
             { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false, className: 'text-sm' },
@@ -116,7 +152,7 @@ $(document).ready(function () {
     }
     function sumSubTotal() {
         var sum = 0;
-        $(".sub_total").each(function() {
+        $(".sub_total").each(function () {
             var str = this.value.trim();  // .trim() may need a shim
             if (str) {   // don't send blank values to `parseInt`
                 sum += parseInt(str, 10);
@@ -129,25 +165,46 @@ $(document).ready(function () {
             $('#quantity_' + id).val(1).change();
         }
         let count = parseInt(price, 10) * parseInt($('#quantity_' + id).val(), 10)
-        $('#price_' + id).text(rupiah(count) == 'RpNaN' ? rupiah(0):rupiah(count)).change();
-        $('#sub_total'+id).val(count).change();
+        $('#price_' + id).text(rupiah(count) == 'RpNaN' ? rupiah(0) : rupiah(count)).change();
+        $('#sub_total' + id).val(count).change();
         $('#totalPrice').text(rupiah(sumSubTotal())).change();
         $('#total_price').val(sumSubTotal()).change();
+        $('#dueField').val(sumSubTotal()).change();
+        $('#parameters').val(sumSubTotal()).change();
+        if ($('[name="discount"]').val() != '') {
+            let hitung = parseInt($('#parameters').val(), 10) - parseInt($('[name="discount"]').val(), 10);
+            $('#totalPrice').text(rupiah(hitung)).change();
+            $('#total_price').val(hitung).change();
+            $('#dueField').val(hitung).change();
+        }
     }
     function triggerElement(triggerData) {
-        $('.btnNumber').each(function() {
+        $('.btnNumber').each(function () {
             $(this).click(function (e) {
                 triggerData.forEach(entry => {
-                    calc(entry.id,entry.price);
+                    calc(entry.id, entry.price);
                 });
             })
         });
-        $('input[type="number"]').each(function() {
+        $('input[type="number"]').each(function () {
             $(this).keyup(function (e) {
                 triggerData.forEach(entry => {
-                    calc(entry.id,entry.price);
+                    if (this.value > entry.stock) {
+                        $(this).val(entry.stock).change();
+                        calc(entry.id, entry.price);
+                    } else {
+                        calc(entry.id, entry.price);
+                    }
                 });
             })
+        });
+        $('input[name="pay"]').keyup(function (e) {
+            if (parseInt(this.value, 10) > parseInt($('#dueField').val(), 10)) {
+                var percent = parseInt($('#dueField').val(), 10) - (parseInt($('#dueField').val(), 10) * 5 / 100);
+                $(this).val(percent).change();
+            } else if (this.value == 0) {
+                $(this).val('').change();
+            }
         });
     }
     function getSelectedProduct(id) {
@@ -160,13 +217,14 @@ $(document).ready(function () {
 
                 triggerData.push({
                     id: data.id,
-                    price: data.selling_price
+                    price: data.selling_price,
+                    stock: data.total_stock
                 });
-                console.log(triggerData);
                 html_ = `<tr id="prow_${data.id}">
                         <td><div class="d-flex px-2 py-1">
                         <div>
                         <img src="${baseUrl}/storage/product/img/${data.image}" class="avatar avatar-sm shadow me-3" alt="product image">
+                        <input type="hidden" name="product_id[]" value="${data.id}">
                         </div>
                         <div class="d-flex flex-column justify-content-center">
                           <h6 class="mb-0 text-sm">${data.product_name}</h6>
@@ -175,16 +233,18 @@ $(document).ready(function () {
                         </div>
                         </td>
                         <td><p class="text-xs font-weight-bold mb-0">${rupiah(data.selling_price)}</p>
-                        <p class="text-xs text-secondary mb-0">${data.type}</p></td>
+                        <p class="text-xs text-secondary mb-0">${data.type}</p>
+                        <input type="hidden" name="selling_price_id[]" value="${data.selling_price_id}">
+                        </td>
                         <td><p class="text-xs font-weight-bold mb-0">${data.total_stock}</p>
                         <p class="text-xs text-secondary mb-0">${data.unit_satuan}</p></td>
                         <td><div class="number-input">
                         <button type="button" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" class="btnNumber"></button>
-                        <input class="quantity_${data.id}" min="1" name="quantity" value="1" type="number" id="quantity_${data.id}">
+                        <input class="quantity_${data.id}" min="1" max="${data.total_stock}" name="quantity[]" value="1" type="number" id="quantity_${data.id}">
                         <button type="button" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus btnNumber"></button>
                       </div></td>
                         <td><h6 class="mb-0 text-sm" id="price_${data.id}">${rupiah(data.selling_price)}</h6>
-                        <input type="hidden" class="sub_total" id="sub_total${data.id}" name="price[]" value="${data.selling_price}">
+                        <input type="hidden" class="sub_total" id="sub_total${data.id}" name="sub_total[]" value="${data.selling_price}">
                         </td>
                         <td>
                             <a href="javascript:void(0)" class="btn btn-sm btn-primary pd-3" target="_blank">Lihat</a>
@@ -195,6 +255,14 @@ $(document).ready(function () {
                 triggerElement(triggerData);
                 $('#totalPrice').text(rupiah(sumSubTotal())).change();
                 $('#total_price').val(sumSubTotal()).change();
+                $('#dueField').val(sumSubTotal()).change();
+                $('#parameters').val(sumSubTotal()).change();
+                if ($('[name="discount"]').val() != '') {
+                    let count = parseInt($('#parameters').val(), 10) - parseInt($('[name="discount"]').val(), 10);
+                    $('#totalPrice').text(rupiah(count)).change();
+                    $('#total_price').val(count).change();
+                    $('#dueField').val(count).change();
+                }
             },
             error: function (err) {
 
@@ -294,6 +362,91 @@ $(document).ready(function () {
             destroySelect2();
         });
     }
+    function formDivHidden(data) {
+        if (data == 'Down Payment' || data == 'Paid') {
+            select2PaymentType();
+            $('#paymentFieldDiv').show('slow');
+            $('#paymentTypeField').attr('required', true).change();
+            $('#payField').attr('required', true).change();
+            data == 'Paid' ? $('#payField').val($('#dueField').val()).attr("readonly", true).css("cursor", "not-allowed").change() : $('#payField').val('').attr("readonly", false).css("cursor", "pointer").change();
+            //scroll down
+            $('#scrollableModal').animate({ scrollTop: $('.modal-body').prop("scrollHeight") }, 800);
+        } else {
+            $('#paymentFieldDiv').hide('slow');
+            $('#paymentTypeField').attr('required', false).change();
+            $('#payField').attr('required', false).change();
+        }
+    }
+    function unselectPaymentStatus() {
+        $('#paymentFieldDiv').hide('slow');
+        $('#payField').attr('required', false);
+        $('#dueFieldDiv').hide('slow');
+    }
+    function select2PaymentType() {
+        $('.select-payment-type').select2({
+            placeholder: 'Choose payment type',
+            allowClear: true,
+            dropdownParent: $("#mdOrder"),
+            width: 'resolve',
+            ajax: {
+                url: baseUrl + "/transaction/orders/select2/payment-type",
+                data: function (params) {
+                    return {
+                        q: params.term
+                    };
+
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item,
+                                id: item,
+                            };
+                        }),
+                    };
+                },
+            }
+        }).on('change', function (e) {
+            if (this.value) {
+                $(this).valid();
+            }
+        });
+    }
+    async function select2PaymentStatus() {
+        await $('.select-payment-status').select2({
+            placeholder: 'Choose payment status',
+            allowClear: true,
+            dropdownParent: $("#mdOrder"),
+            ajax: {
+                url: baseUrl + "/transaction/orders/select2/payment-status",
+                data: function (params) {
+                    return {
+                        q: params.term
+                    };
+
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item,
+                                id: item,
+                            };
+                        }),
+                    };
+                },
+            }
+        }).on('change', function (e) {
+            if (this.value) {
+                $(this).valid();
+            }
+        }).on('select2:select', function (e) {
+            formDivHidden(e.params.data.id);
+        }).on("select2:unselect", function (e) {
+            unselectPaymentStatus();
+        });
+    }
     async function ajaxClickLoadMoreHistory(id) {
         await $('#loadMore').click(function (e) {
             e.preventDefault();
@@ -336,45 +489,71 @@ $(document).ready(function () {
                     el.find(':submit').attr('form', result.idForm);
                 }
                 el.find('#mainContent').html(result.html);
+                $('[data-bs-toggle="tooltip"]').tooltip({
+                    boundary: 'window',
+                    template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>',
+                    html: true,
+                    trigger: 'hover',
+                    placement: 'top',
+                    container: 'body',
+                    customClass: 'tooltip-custom',
+                    delay: { "show": 100, "hide": 100 },
+                    offset: '10px',
+                    sanitize: false,
+
+                });
+                $('.imask').each(function () {
+                    IMask(
+                        this,
+                        {
+                            mask: Number,
+                            min: 1,
+                        }
+                    );
+                })
                 let valid = jqueryValidation_("#fm_" + type + "Order", {
-                    name: {
+                    date: {
                         required: true,
                     },
-                    email: {
-                        email: true,
+                    customer_id: {
                         required: true,
                     },
-                    phone: {
-                        required: true,
+                    discount: {
                         number: true
                     },
-                    address: {
+                    payment_status: {
                         required: true,
                     },
-                    photo: {
-                        extension: "jpg|png|jpeg|webp"
-                    }
+                    pay: {
+                        number: true,
+                    },
                 });
                 select2Customer();
                 select2Product();
+                select2PaymentStatus();
                 if (type == 'edit') {
                     $('#sellingPriceField').select2({
                         placeholder: 'Choose price',
                     });
                 } else if (type == 'add') {
                     airDatepicker('#dateField');
+                    $('[name="order_code"').val(result.code_order);
                     $('#discountField').keyup(function (e) {
-                        var totalPrice = $('#total_price').val();
-                        let count = parseInt(totalPrice, 10) - parseInt($(this).val(), 10);
+                        var parameters = $('#parameters').val();
+                        let count = parseInt(parameters, 10) - parseInt($(this).val(), 10);
                         if ($(this).val() == '') {
                             $('#totalPrice').text(rupiah(sumSubTotal())).change();
+                            $('#totalDiscount').text(rupiah(0)).change();
                             $('#total_price').val(sumSubTotal()).change();
+                            $('#dueField').val(sumSubTotal()).change();
                         } else {
                             $('#totalPrice').text(rupiah(count)).change();
+                            $('#totalDiscount').text(rupiah(this.value)).change();
                             $('#total_price').val(count).change();
+                            $('#dueField').val(count).change();
                         }
                     })
-                } else{
+                } else {
                     $('[data-bs-toggle="tooltip"]').tooltip({
                         trigger: 'hover'
                     });
@@ -398,9 +577,10 @@ $(document).ready(function () {
             contentType: false,
             cache: false,
             success: function (result) {
-                console.log(result);
+                // console.log(result);
                 notifToast(result.status, result.message);
                 if (result.status == "success") {
+                    triggerData.length = 0;
                     $("#fm_addOrder").trigger("reset");
                     $('#mdOrder').modal('hide');
                     tbOrder.ajax.reload();
@@ -503,9 +683,15 @@ $(document).ready(function () {
         },
         'submit': function (e) {
             e.preventDefault();
-            var val = $(this).find('[name="name"]').val();
+            var val = $(this).find('[name="order_code"]').val();
             var ele = $(this).find(':submit').data('el');
             var el = $(ele);
+            var checktable = $('#total_price').val();
+            if (checktable == 0 || checktable == null || checktable == '' || checktable == undefined) {
+                notifToast('error', 'Please add product in order');
+                return;
+            }
+
             if (el.valid()) {
                 switch (ele) {
                     case '#fm_addOrder':
@@ -531,7 +717,7 @@ $(document).ready(function () {
                             btnClass: 'btn-purple',
                             action: function () {
                                 switch (title) {
-                                    case 'Add Supplier':
+                                    case 'Add Order':
                                         ajaxAddOrder(el)
                                         break;
                                     default:

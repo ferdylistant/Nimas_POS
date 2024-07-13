@@ -65,7 +65,7 @@ class ProductController extends Controller
                 <a class="cursor-pointer" id="dropdownTable" data-bs-toggle="dropdown" title="" data-bs-original-title="More Actions" aria-expanded="false">
                     <i class="fa fa-list-ul text-secondary  tooltip-wrapper"></i>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5" style="z-index: 999!important;"
+                <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5"
                     aria-labelledby="dropdownTable" >
                     <li><a class="dropdown-item border-radius-md" href="' . url('products/product-list/detail/' . $data->id) . '"><i class="fa fa-eye me-2"></i> Detail </a></li>
                     <li><a class="dropdown-item border-radius-md" href="?modal=addStock&id=' . $data->id . '&name=' . $data->product_name . '" data-bs-toggle="modal"

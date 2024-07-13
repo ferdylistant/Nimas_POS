@@ -23,6 +23,7 @@ function jqueryValidation_(element, rules, messages = {}) {
             if ($(element).parent().hasClass('image-preview')) {
                 $(element).parent().css('border-color', '#dc3545')
             } else {
+                $(element).parent().addClass('is-invalid').removeClass('is-valid');
                 $(element).addClass('is-invalid').removeClass('is-valid');
             }
 
@@ -31,12 +32,13 @@ function jqueryValidation_(element, rules, messages = {}) {
             if ($(element).parent().hasClass('image-preview')) {
                 $(element).parent().css('border-color', '#ddd')
             } else {
+                $(element).parent().removeClass('is-invalid');
                 $(element).removeClass('is-invalid');
             }
 
         },
         rules: _rules,
-        ignore: [],
+        // ignore: [],
         messages: messages
     })
 }
