@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title')
-    {{ config('app.name', 'Laravel') }} | Supplier
+    Supplier | {{ config('app.name', 'Laravel') }}
 @endsection
 @section('cssRequired')
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.bootstrap5.css">

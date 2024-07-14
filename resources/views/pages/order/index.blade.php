@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title')
-    {{ config('app.name', 'Laravel') }} | Orders
+    Orders | {{ config('app.name', 'Laravel') }}
 @endsection
 @section('cssRequired')
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.bootstrap5.css">
@@ -22,24 +22,10 @@
                             <h6>Order List</h6>
                         </div>
                         <div class="col-lg-6 col-5 my-auto text-end">
-                            <div class="dropdown float-lg-end pe-4">
-                                <a class="cursor-pointer" id="dropdownTable" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <i class="fa fa-ellipsis-v text-secondary"></i>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end px-2 py-3 ms-sm-n4 ms-n5"
-                                    aria-labelledby="dropdownTable">
-                                    <li><a class="dropdown-item border-radius-md" href="?modal=add" data-bs-toggle="modal"
+                            <a class="btn btn-sm btn-primary" href="?modal=add" data-bs-toggle="modal"
                                             data-bs-target="#mdOrder"><i
                                                 class="fa fa-plus me-2"></i>
-                                            Create</a></li>
-                                    <li><a class="dropdown-item border-radius-md" href="javascript:;"><i
-                                                class="fa fa-eye me-2"></i> Preview</a>
-                                    </li>
-                                    <li><a class="dropdown-item border-radius-md text-danger" href="javascript:;"><i
-                                                class="fa fa-trash me-2"></i> Delete All</a></li>
-                                </ul>
-                            </div>
+                                            Create</a>
                         </div>
                     </div>
                     <hr class="horizontal dark mt-0">

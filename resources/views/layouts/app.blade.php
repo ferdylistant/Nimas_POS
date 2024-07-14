@@ -29,25 +29,21 @@
     @include('layouts.sidebar')
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
         <!-- Navbar -->
-        <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
-            navbar-scroll="true">
+        <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl position-sticky blur shadow-blur mt-4 left-auto top-1 z-index-sticky" id="navbarBlur"
+            navbar-scroll="false">
             <div class="container-fluid py-1 px-3">
                 @include('layouts.breadcrumb')
                 <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
                     <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-                        <div class="input-group">
-                            <span class="input-group-text text-body"><i class="fas fa-search"
-                                    aria-hidden="true"></i></span>
-                            <input type="text" class="form-control" placeholder="Type here...">
-                        </div>
+                        <h6 class="mb-0 text-primary text-gradient">{{ auth()->user()->name }}</h6>
                     </div>
                     <ul class="navbar-nav justify-content-end">
-                        <li class="nav-item px-3 d-flex align-items-center">
+                        {{-- <li class="nav-item px-3 d-flex align-items-center">
                             <a href="javascript:;" class="nav-link text-body p-0" data-bs-toggle="tooltip"
                                 data-bs-placement="bottom" title="" data-bs-original-title="UI Configurator">
                                 <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
                             </a>
-                        </li>
+                        </li> --}}
                         <li class="nav-item dropdown pe-4 d-flex align-items-center">
                             <a href="javascript:;" class="nav-link text-body font-weight-bold p-0"
                                 id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false"
@@ -98,47 +94,24 @@
         <!-- End Navbar -->
         <div class="container-fluid py-4">
             @yield('content')
-            <footer class="footer pt-3">
+            <footer class="footer pt-3 bottom-0">
                 <div class="container-fluid">
-                    <div class="row align-items-center justify-content-lg-between">
-                        <div class="col-lg-6 mb-lg-0 mb-4">
-                            <div class="copyright text-center text-sm text-muted text-lg-start">
+                    <div class="row align-items-center">
+                        <div class="col-lg-12 mb-lg-0 mb-4">
+                            <div class="copyright text-center text-sm text-muted text-lg-end">
                                 ©
                                 <script>
                                     document.write(new Date().getFullYear())
                                 </script>,
-                                made with <i class="fa fa-heart"></i> by
-                                <a href="https://www.creative-tim.com" class="font-weight-bold" target="_blank">Creative
-                                    Tim</a>
-                                for a better web.
+                                Toko Kurnia
                             </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                                <li class="nav-item">
-                                    <a href="https://www.creative-tim.com" class="nav-link text-muted"
-                                        target="_blank">Creative Tim</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="https://www.creative-tim.com/presentation" class="nav-link text-muted"
-                                        target="_blank">About Us</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="https://www.creative-tim.com/blog" class="nav-link text-muted"
-                                        target="_blank">Blog</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="https://www.creative-tim.com/license" class="nav-link pe-0 text-muted"
-                                        target="_blank">License</a>
-                                </li>
-                            </ul>
                         </div>
                     </div>
                 </div>
             </footer>
         </div>
     </main>
-    <div class="fixed-plugin">
+    {{-- <div class="fixed-plugin">
         <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
             <i class="fa fa-cog py-2"> </i>
         </a>
@@ -199,7 +172,7 @@
                 <hr class="horizontal dark my-sm-4">
             </div>
         </div>
-    </div>
+    </div> --}}
     <!--   Core JS Files   -->
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>

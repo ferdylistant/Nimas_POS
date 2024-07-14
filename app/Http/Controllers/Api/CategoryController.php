@@ -30,7 +30,7 @@ class CategoryController extends Controller
                 })
                 ->addColumn('action', function ($data) {
                     $option = '';
-                    $option .= '<div class="dropdown float-lg-end pe-4">
+                    $option .= '<div class="dropstart float-lg-end pe-4">
                 <a class="cursor-pointer" id="dropdownTable" data-bs-toggle="dropdown" title="" data-bs-original-title="More Actions" aria-expanded="false">
                     <i class="fa fa-list-ul text-secondary"></i>
                 </a>
@@ -38,7 +38,7 @@ class CategoryController extends Controller
                     aria-labelledby="dropdownTable">';
                     $option .= '<li><a class="dropdown-item border-radius-md" href="javascript:;" data-bs-toggle="modal"
                             data-bs-target="#mdCategory" data-type="edit" data-id="' . $data->id . '" data-name="' . $data->category_name . '"><i class="fa fa-edit me-2"></i> Edit</a></li>
-                    <li><a class="dropdown-item border-radius-md text-danger" href="javascript:;"><i
+                    <li><a class="dropdown-item border-radius-md text-danger btnDelete" data-id="' . $data->id . '" data-name="' . $data->category_name . '" href="javascript:;"><i
                                 class="fa fa-trash me-2"></i> Delete</a></li>';
                     $option .= '</ul>
                 </div>';
@@ -124,9 +124,21 @@ class CategoryController extends Controller
     }
 
     //---------------------------Delete--------------------------------------
-    public function destroy($id)
+    public function destroy()
     {
+        $id = request('id');
+        $assignedProducts = DB::table('products')->where('category_id', $id)->exists();
+        if ($assignedProducts) {
+            return response()->json([
+                'status' => 'warning',
+                'message' => 'Category cannot be deleted because it is assigned to a product',
+            ]);
+        }
         DB::table('categories')->where('id', $id)->delete();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Category deleted successfully',
+        ]);
         // $category=Category::findorfail($id);
         // $category->delete();
     }

@@ -11,6 +11,39 @@ $(document).ready(function () {
             sSearch: '',
             lengthMenu: '_MENU_ /halaman',
         },
+        drawCallback: () => {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    trigger: 'hover'
+                })
+            });
+            var dropdownTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'))
+            const dropdown = dropdownTriggerList.map(dropdownToggleEl => {
+                var instance = new bootstrap.Dropdown(dropdownToggleEl, {
+                    // popperConfig(defaultBsPopperConfig) {
+                    //     console.log(defaultBsPopperConfig);
+                    //     return { ...defaultBsPopperConfig, strategy: "fixed" };
+                    // },
+                    boundary: "clippingParents",
+                    rootBoundary: "viewport",
+                    // strategy: "fixed",
+                    display: "static",
+                    // offset: [-300, 0],
+                });
+
+                // / /Attach event listeners to the dropdown trigger
+                dropdownToggleEl.addEventListener("show.bs.dropdown", function (event) {
+                    $(event.target).closest(".table").find(".dtfc-fixed-right").removeClass("z-index-9");
+                    $(event.target).closest("td").addClass("z-index-3");
+                });
+
+                dropdownToggleEl.addEventListener("hide.bs.dropdown", function (event) {
+                    $(event.target).closest("td").removeClass("z-index-3");
+                });
+            });
+            // console.log(tooltipTriggerList);
+        },
         order: [[0, 'asc']],
         ajax: baseUrl + "/products/category",
         columns: [
@@ -97,6 +130,25 @@ $(document).ready(function () {
             }
         });
     }
+    function ajaxDeleteCategory(id) {
+        $.ajax({
+            type: "POST",
+            url: baseUrl + "/products/category/delete",
+            data: {
+                id: id
+            },
+            async: true,
+            success: function (result) {
+                notifToast(result.status, result.message);
+                if (result.status == "success") {
+                    tbCategory.ajax.reload();
+                }
+            },
+            error: function (err) {
+                notifToast("error", err.responseJSON.message);
+            }
+        });
+    }
     $('#mdCategory').on({
         'shown.bs.modal': function (e) {
             var type = $(e.relatedTarget).data('type');
@@ -142,5 +194,31 @@ $(document).ready(function () {
                 });
             }
         }
-    })
+    });
+    $('#tb_Category').on('click','.btnDelete',function (e) {
+        e.preventDefault();
+        var id = $(this).data('id');
+        var name = $(this).data('name');
+        $.confirm({
+            theme: 'modern',
+            icon: 'fa fa-question',
+            title: 'Delete Category',
+            content: 'Are you sure you want to delete (' + name + ')?',
+            type: 'red',
+            columnClass: 'col-md-6 col-md-offset-3',
+            animationBounce: 2.5,
+            buttons: {
+                confirm: {
+                    text: 'Sure!',
+                    btnClass: 'btn-red',
+                    action: function() {
+                        ajaxDeleteCategory(id);
+                    }
+                },
+                cancel: function() {
+                    // $.alert('Canceled!');
+                }
+            }
+        });
+    });
 });

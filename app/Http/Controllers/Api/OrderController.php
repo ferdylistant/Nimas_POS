@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use DateTime;
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Product;
+use App\Models\Category;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
@@ -164,6 +166,12 @@ class OrderController extends Controller
                     }
                 }
             }
+            DB::table('order_histories')->insert([
+                'order_id' => $order_id,
+                'type_history' => 'create',
+                'content' =>  json_encode(['text' => 'Order (' . $code_order . ') dibuat.']),
+                'created_by' => auth()->user()->id
+            ]);
             DB::commit();
             return response()->json([
                'status' => 'success',
@@ -632,8 +640,9 @@ class OrderController extends Controller
     }
     protected function showModalHistory($request)
     {
-        $product_id = $request->id;
-        $data = DB::table('product_histories')->where('product_id', $product_id)->orderBy('id', 'ASC')->paginate(2);
+        $order_id = $request->id;
+        // dd($order_id);
+        $data = DB::table('order_histories')->where('order_id', $order_id)->orderBy('id', 'ASC')->paginate(2);
         $title = '<i class="fa fa-history me-2"></i> History (' . $request->name . ')';
         $html = '';
         $htmlSub = '';

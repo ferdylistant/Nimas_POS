@@ -27,6 +27,7 @@ Route::middleware(['auth'])->group(function () use ($path) {
             Route::match(['get', 'post'], '/{type}/ajax-modal', $path . '\Api\CategoryController@ajaxModal');
             Route::post('/store', $path . '\Api\CategoryController@store');
             Route::post('/update', $path . '\Api\CategoryController@update');
+            Route::post('/delete', $path . '\Api\CategoryController@destroy');
         });
         //Products List
         Route::prefix('product-list')->group(function () use ($path) {
