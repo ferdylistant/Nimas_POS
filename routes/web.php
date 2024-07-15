@@ -19,6 +19,7 @@ Route::post('do-login', $path . '\AuthController@doLogin')->name('do-login');
 Route::middleware(['auth'])->group(function () use ($path) {
     Route::get('/logout', $path . '\AuthController@logout')->name('logout');
     Route::get('/', $path . '\DashboardController@index')->name('dashboard');
+    Route::match(['get','post'],'/charts/{type}',$path.'\DashboardController@ajaxChart')->name('chart');
     //Product
     Route::prefix('products')->group(function () use ($path) {
         //Category

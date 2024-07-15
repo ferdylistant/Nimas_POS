@@ -153,7 +153,7 @@
                         </div>
                     </div>
                     <h6 class="ms-2 mt-4 mb-0"> Active Customers </h6>
-                    <p class="text-sm ms-2"> (<span class="font-weight-bolder">+23%</span>) than last week </p>
+                    <p class="text-sm ms-2"> (<span class="font-weight-bolder" id="percentCustomerYear">+0%</span>) for a year </p>
                     <div class="container border-radius-lg">
                         <div class="row">
                             <div class="col-4 py-3 ps-0">
@@ -182,10 +182,10 @@
                                     </div>
                                     <p class="text-xs mt-1 mb-0 font-weight-bold">Customers</p>
                                 </div>
-                                <h4 class="font-weight-bolder">{{$customer}}</h4>
-                                <div class="progress w-75">
-                                    <div class="progress-bar bg-dark w-60" role="progressbar" aria-valuenow="60"
-                                        aria-valuemin="0" aria-valuemax="100"></div>
+                                <h4 class="font-weight-bolder" id="custTotal">0</h4>
+                                <div class="progress w-100">
+                                    <div class="progress-bar bg-dark" role="progressbar" aria-valuenow=""
+                                        aria-valuemin="0" aria-valuemax="100" id="custPercentBar"></div>
                                 </div>
                             </div>
                             <div class="col-4 py-3 ps-0">
@@ -214,9 +214,9 @@
                                     </div>
                                     <p class="text-xs mt-1 mb-0 font-weight-bold">Sales</p>
                                 </div>
-                                <h4 class="font-weight-bolder">435$</h4>
-                                <div class="progress w-75">
-                                    <div class="progress-bar bg-dark w-30" role="progressbar" aria-valuenow="30"
+                                <h4 class="font-weight-bolder" id="totalSales">0</h4>
+                                <div class="progress w-100">
+                                    <div class="progress-bar bg-dark w-100" role="progressbar" aria-valuenow="30"
                                         aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
@@ -247,12 +247,12 @@
                                             </g>
                                         </svg>
                                     </div>
-                                    <p class="text-xs mt-1 mb-0 font-weight-bold">Items</p>
+                                    <p class="text-xs mt-1 mb-0 font-weight-bold">Product</p>
                                 </div>
-                                <h4 class="font-weight-bolder">43</h4>
-                                <div class="progress w-75">
-                                    <div class="progress-bar bg-dark w-50" role="progressbar" aria-valuenow="50"
-                                        aria-valuemin="0" aria-valuemax="100"></div>
+                                <h4 class="font-weight-bolder" id="prodTotal">0</h4>
+                                <div class="progress w-100">
+                                    <div class="progress-bar bg-dark" role="progressbar" aria-valuenow="0"
+                                        aria-valuemin="0" aria-valuemax="100" id="prodPercentBar"></div>
                                 </div>
                             </div>
                         </div>
@@ -264,10 +264,10 @@
             <div class="card z-index-2">
                 <div class="card-header pb-0">
                     <h6>Sales overview</h6>
-                    <p class="text-sm">
+                    {{-- <p class="text-sm">
                         <i class="fa fa-arrow-up text-success"></i>
                         <span class="font-weight-bold">4% more</span> in 2021
-                    </p>
+                    </p> --}}
                 </div>
                 <div class="card-body p-3">
                     <div class="chart">
@@ -662,174 +662,5 @@
     </div> --}}
 @endsection
 @section('jsNeeded')
-    <script>
-        var ctx = document.getElementById("chart-bars").getContext("2d");
-
-        new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                datasets: [{
-                    label: "Sales",
-                    tension: 0.4,
-                    borderWidth: 0,
-                    borderRadius: 4,
-                    borderSkipped: false,
-                    backgroundColor: "#fff",
-                    data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
-                    maxBarThickness: 6
-                }, ],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false,
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index',
-                },
-                scales: {
-                    y: {
-                        grid: {
-                            drawBorder: false,
-                            display: false,
-                            drawOnChartArea: false,
-                            drawTicks: false,
-                        },
-                        ticks: {
-                            suggestedMin: 0,
-                            suggestedMax: 500,
-                            beginAtZero: true,
-                            padding: 15,
-                            font: {
-                                size: 14,
-                                family: "Open Sans",
-                                style: 'normal',
-                                lineHeight: 2
-                            },
-                            color: "#fff"
-                        },
-                    },
-                    x: {
-                        grid: {
-                            drawBorder: false,
-                            display: false,
-                            drawOnChartArea: false,
-                            drawTicks: false
-                        },
-                        ticks: {
-                            display: false
-                        },
-                    },
-                },
-            },
-        });
-
-
-        var ctx2 = document.getElementById("chart-line").getContext("2d");
-
-        var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
-
-        gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
-        gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-        gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
-
-        var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
-
-        gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
-        gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-        gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
-
-        new Chart(ctx2, {
-            type: "line",
-            data: {
-                labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                datasets: [{
-                        label: "Mobile apps",
-                        tension: 0.4,
-                        borderWidth: 0,
-                        pointRadius: 0,
-                        borderColor: "#cb0c9f",
-                        borderWidth: 3,
-                        backgroundColor: gradientStroke1,
-                        fill: true,
-                        data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-                        maxBarThickness: 6
-
-                    },
-                    {
-                        label: "Websites",
-                        tension: 0.4,
-                        borderWidth: 0,
-                        pointRadius: 0,
-                        borderColor: "#3A416F",
-                        borderWidth: 3,
-                        backgroundColor: gradientStroke2,
-                        fill: true,
-                        data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
-                        maxBarThickness: 6
-                    },
-                ],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false,
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index',
-                },
-                scales: {
-                    y: {
-                        grid: {
-                            drawBorder: false,
-                            display: true,
-                            drawOnChartArea: true,
-                            drawTicks: false,
-                            borderDash: [5, 5]
-                        },
-                        ticks: {
-                            display: true,
-                            padding: 10,
-                            color: '#b2b9bf',
-                            font: {
-                                size: 11,
-                                family: "Open Sans",
-                                style: 'normal',
-                                lineHeight: 2
-                            },
-                        }
-                    },
-                    x: {
-                        grid: {
-                            drawBorder: false,
-                            display: false,
-                            drawOnChartArea: false,
-                            drawTicks: false,
-                            borderDash: [5, 5]
-                        },
-                        ticks: {
-                            display: true,
-                            color: '#b2b9bf',
-                            padding: 20,
-                            font: {
-                                size: 11,
-                                family: "Open Sans",
-                                style: 'normal',
-                                lineHeight: 2
-                            },
-                        }
-                    },
-                },
-            },
-        });
-    </script>
+<script type="text/javascript" src="{{asset('pages/js/dashboard/index.js')}}" async></script>
 @endsection
