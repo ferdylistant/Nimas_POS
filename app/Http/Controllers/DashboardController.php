@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Customer;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -121,20 +122,35 @@ class DashboardController extends Controller
         ))->get();
 
         $coll = collect($totalProductByMonth->toArray())->groupBy('order_month')->all();
+        // $coll =
         $filtered = collect($coll)->map(function ($item) {
+            $prod = [];
+            $hasil = [];
+            // $sum[]
             foreach ($item as $res) {
-
-                $hasil[] = $res->qty;
+                if ($prod == []) {
+                    array_push($prod,$res->product_id);
+                    array_push($hasil,$res->qty);
+                } else {
+                    if (in_array($res->product_id, $prod)) {
+                        array_push($prod, $res->product_id);
+                        continue;
+                    }
+                    array_push($hasil,$res->qty);
+                }
+                // $hasil[] = [
+                //     'qty' => $res->qty
+                // ];
             }
             return $hasil;
         })->all();
+        $lab = [];
         $res = [];
         $it = 0;
         foreach ($totalProduct as $i => $item) {
             foreach ($filtered as $k => $f) {
-                // dd($i);
-                if (++$it <= count($totalProduct)) {
-                    $res[] = [
+                // if (++$it <= count($totalProduct)) {
+                    array_push($res, [
                         'label' => $item->product_name,
                         'tension' => 0.4,
                         'borderWidth' => 0,
@@ -144,10 +160,11 @@ class DashboardController extends Controller
                         'fill' => true,
                         'data' => $f,
                         'maxBarThickness' => 6
-                    ];
-                }
+                    ]);
+                // }
             }
         }
+        dd($filtered);
         // foreach ($totalProductByMonth as)
         // $res = collect($totalProduct)->map(function ($item) use ($filtered) {
         //     foreach ($filtered as $f) {
