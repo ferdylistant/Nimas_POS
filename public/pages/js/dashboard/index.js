@@ -73,6 +73,7 @@
     }
     function chartLine(data)
     {
+        console.log(data);
         var ctx2 = document.getElementById("chart-line").getContext("2d");
 
         var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
@@ -150,24 +151,43 @@
             },
         });
     }
-    $.ajax({
-        url: url+'/charts/bar',
-        type: 'GET',
-        async: true,
-        success: function (res) {
-            // console.log(res.chart_line.tot_product);
-            //chart Bar
-            chartBar(res);
-            $("#custTotal").text(res.customer_sales);
-            $("#custPercentBar").toggleClass('w-'+res.percent_customer);
-            $("#custPercentBar").attr('aria-valuenow',res.percent_customer);
-            $("#percentCustomerYear").text('+'+res.percent_customer+'%');
-            $('#totalSales').text('Rp.'+res.total_sales);
-            $("#prodTotal").text(res.product_sales);
-            $("#prodPercentBar").toggleClass('w-'+res.percent_product);
-            $("#prodPercentBar").attr('aria-valuenow',res.percent_product);
-            //chart Line
-            chartLine(res);
-        }
-    });
+
+    async function ajaxChartBar() {
+        await $.ajax({
+            url: url+'/charts/bar',
+            type: 'GET',
+            async: true,
+            success: function (res) {
+                // console.log(res.chart_line.tot_product);
+                //chart Bar
+                chartBar(res);
+                $("#custTotal").text(res.customer_sales);
+                $("#custPercentBar").toggleClass('w-'+res.percent_customer);
+                $("#custPercentBar").attr('aria-valuenow',res.percent_customer);
+                $("#percentCustomerYear").text('+'+res.percent_customer+'%');
+                $('#totalSales').text('Rp.'+res.total_sales);
+                $("#prodTotal").text(res.product_sales);
+                $("#prodPercentBar").toggleClass('w-'+res.percent_product);
+                $("#prodPercentBar").attr('aria-valuenow',res.percent_product);
+                //chart Line
+                // chartLine(res);
+            }
+        });
+    }
+    async function ajaxChartLine() {
+        await $.ajax({
+            url: url+'/charts/line',
+            type: 'GET',
+            async: true,
+            success: function (res) {
+                //chart Line
+                chartLine(res);
+            }
+        });
+    }
+    async function initChart() {
+        await ajaxChartBar();
+        // await ajaxChartLine();
+    }
+    initChart();
 })();

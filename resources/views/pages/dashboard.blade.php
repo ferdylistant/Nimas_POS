@@ -144,7 +144,7 @@
         </div>
     </div> --}}
     <div class="row mt-4">
-        <div class="col-lg-5 mb-lg-0 mb-4">
+        <div class="col-lg-12 mb-lg-0 mb-4">
             <div class="card z-index-2">
                 <div class="card-body p-3">
                     <div class="bg-gradient-dark border-radius-lg py-3 pe-1 mb-3">
@@ -260,14 +260,14 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-7">
+        {{-- <div class="col-lg-7">
             <div class="card z-index-2">
                 <div class="card-header pb-0">
                     <h6>Sales overview</h6>
-                    {{-- <p class="text-sm">
+                    <p class="text-sm">
                         <i class="fa fa-arrow-up text-success"></i>
                         <span class="font-weight-bold">4% more</span> in 2021
-                    </p> --}}
+                    </p>
                 </div>
                 <div class="card-body p-3">
                     <div class="chart">
@@ -275,7 +275,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
     {{--<div class="row my-4">
         <div class="col-lg-8 col-md-6 mb-md-0 mb-4">

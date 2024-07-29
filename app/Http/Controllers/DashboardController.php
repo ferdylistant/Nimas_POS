@@ -90,8 +90,6 @@ class DashboardController extends Controller
         ->groupBy('od.product_id')->get()->count();
         $totalProduct = Product::count();
         $percentProd = ($prod / $totalProduct) * 100;
-
-        $chartLineData = Self::lineChart($currentYear,$month);
         return response()->json([
             'month' => $month,
             'sales' => $sales,
@@ -100,90 +98,87 @@ class DashboardController extends Controller
             'total_sales' => $totalSales,
             'percent_product' => $percentProd,
             'product_sales' => $prod,
-            'chart_line' => $chartLineData
         ]);
     }
-    protected function lineChart($currentYear,$month)
+    protected function lineChart()
     {
+        $currentYear = date('Y');
         $totalProduct = DB::table('order_details as od')
         ->leftJoin('orders as o','o.id','=','od.order_id')
         ->leftJoin('products as p','p.id','=','od.product_id')
         ->where('o.order_year',$currentYear)
         ->groupBy('od.product_id')
         ->orderBy('od.order_id','asc')
-        ->select('p.product_name')->get();
+        ->select('od.product_id','p.product_name')->get();
         $totalProductByMonth = DB::table('order_details as od')
         ->leftJoin('orders as o','o.id','=','od.order_id')
         ->where('o.order_year',$currentYear)
-        ->groupBy(['od.product_id','o.order_date'])
-        ->orderBy('o.id','asc')
+        ->groupByRaw('od.product_id,o.order_date')
+        ->orderBy('o.order_date','asc')
         ->select('od.product_id','o.order_month',DB::raw(
             'IFNULL(SUM(od.pro_quantity),0) as qty'
         ))->get();
 
         $coll = collect($totalProductByMonth->toArray())->groupBy('order_month')->all();
-        // $coll =
-        $filtered = collect($coll)->map(function ($item) {
-            $prod = [];
-            $hasil = [];
-            // $sum[]
-            foreach ($item as $res) {
-                if ($prod == []) {
-                    array_push($prod,$res->product_id);
-                    array_push($hasil,$res->qty);
-                } else {
-                    if (in_array($res->product_id, $prod)) {
-                        array_push($prod, $res->product_id);
-                        continue;
-                    }
-                    array_push($hasil,$res->qty);
-                }
-                // $hasil[] = [
-                //     'qty' => $res->qty
-                // ];
+        foreach ($coll as $key => $value) {
+            $has[$key] = collect($value)->groupBy('product_id')->all();
+        }
+        //SUM
+        foreach ($has as $key => $value) {
+            foreach ($value as $k => $v) {
+                $filtered[$key][$k] = collect($v)->sum('qty');
             }
-            return $hasil;
-        })->all();
-        $lab = [];
-        $res = [];
-        $it = 0;
-        foreach ($totalProduct as $i => $item) {
-            foreach ($filtered as $k => $f) {
-                // if (++$it <= count($totalProduct)) {
-                    array_push($res, [
-                        'label' => $item->product_name,
-                        'tension' => 0.4,
-                        'borderWidth' => 0,
-                        'pointRadius' => 0,
-                        'borderColor' => $this->randomHexColor(),
-                        'borderWidth' => 3,
-                        'fill' => true,
-                        'data' => $f,
-                        'maxBarThickness' => 6
-                    ]);
+        }
+        $quantity = [];
+        foreach($filtered as $key => $value) {
+            foreach ($value as $k => $v) {
+                $dataset[$k] = $value;
+                // foreach ($totalProduct as $i => $item) {
+                //     foreach ($month as $s => $m) {
+                //         $coba[] = $dataset[$m][$item->product_id];
+                //         if ($m == $key) {
+                //             // array_push($quantity, [
+                //             //     $k => $dataset[$m][$item->product_id]
+                //             // ]);
+                //             if ($item->product_id == $k) {
+                //                 $res[] = [
+                //                     'label' => $item->product_name,
+                //                     'tension' => 0.4,
+                //                     'borderWidth' => 0,
+                //                     'pointRadius' => 0,
+                //                     'borderColor' => $this->randomHexColor(),
+                //                     'borderWidth' => 3,
+                //                     'fill' => true,
+                //                     'data' => $dataset[$m][$item->product_id],
+                //                     'maxBarThickness' => 6
+                //                 ];
+                //             }
+                //         }
+                //     }
                 // }
             }
         }
-        dd($filtered);
-        // foreach ($totalProductByMonth as)
-        // $res = collect($totalProduct)->map(function ($item) use ($filtered) {
-        //     foreach ($filtered as $f) {
-        //         $hasil[] = [
-        //             'label' => $item->product_name,
-        //             'tension' => 0.4,
-        //             'borderWidth' => 0,
-        //             'pointRadius' => 0,
-        //             'borderColor' => $this->randomHexColor(),
-        //             'borderWidth' => 3,
-        //             'fill' => true,
-        //             'data' => $f,
-        //             'maxBarThickness' => 6
-        //         ];
+        // foreach ($dataset as $key => $value) {
+        //     $quantity[] = $key;
+        //     foreach ($totalProduct as $i => $item) {
+        //         if ($item->product_id == $key) {
+        //             $res[] = [
+        //                 'label' => $item->product_name,
+        //                 'tension' => 0.4,
+        //                 'borderWidth' => 0,
+        //                 'pointRadius' => 0,
+        //                 'borderColor' => $this->randomHexColor(),
+        //                 'borderWidth' => 3,
+        //                 'fill' => true,
+        //                 'data' => $value,
+        //                 'maxBarThickness' => 6
+        //             ];
+        //         }
         //     }
-        //     return $hasil;
-        // })->all();
+        // }
+        dd($dataset);
         $data = [
-            'tot_product' => $res,
+            'tot_product' => $filtered,
             'by_month' => $totalProductByMonth
         ];
         return $data;
