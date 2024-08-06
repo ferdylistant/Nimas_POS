@@ -510,9 +510,9 @@ class ProductController extends Controller
                     <span id="err_product_name"></span>
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="kodeField" class="col-form-label">Kode: <span class="text-danger">*</span></label>
+                    <label for="kodeField" class="col-form-label">Kode: </label>
                     <div class="input-group input-group-sm">
-                    <input type="text" name="product_code" id="kodeField" class="form-control form-control-sm" placeholder="Enter/Scan Product Code" required>
+                    <input type="text" name="product_code" id="kodeField" class="form-control form-control-sm" placeholder="Enter/Scan Product Code">
                     <div class="input-group-append">
                         <span class="input-group-text text-primary">
                             <a href="javascript:void(0)" class="btnCheckProductCode" title="Check Product Code"><i class="fas fa-barcode"></i></a>
@@ -537,8 +537,8 @@ class ProductController extends Controller
             </div>
             <div class="row">
                 <div class="form-group col-md-12">
-                    <label for="imageField" class="col-form-label mb-2">Image: <span class="text-danger">*</span></label>
-                    <input type="file" name="image" id="imageField" onchange="onFileSelected(event)" class="form-control form-control-sm" required>
+                    <label for="imageField" class="col-form-label mb-2">Image: </label>
+                    <input type="file" name="image" id="imageField" onchange="onFileSelected(event)" class="form-control form-control-sm">
                     <span id="err_image"></span>
                 </div>
                 <div id="image_preview"></div>

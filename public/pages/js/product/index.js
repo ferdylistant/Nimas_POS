@@ -351,9 +351,9 @@ $(document).ready(function () {
                     unit_satuan: {
                         required: true,
                     },
-                    product_code: {
-                        required: true,
-                    },
+                    // product_code: {
+                    //     required: true,
+                    // },
                     'selling_price_type[]': {
                         required: true,
                     },
@@ -362,7 +362,7 @@ $(document).ready(function () {
                         number: true
                     },
                     image: {
-                        required: true,
+                        // required: true,
                         extension: "jpg|png|jpeg|webp"
                     }
                 });
